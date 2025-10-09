@@ -34,19 +34,17 @@ const Host = (): JSX.Element => {
       <h1>Host Screen</h1>
       <div>
         <div className="video-screens-container">
-          <div className="video-container">
-            <video ref={localFeed} autoPlay playsInline muted />
-            <button
-              onClick={() => {
-                setIsVideoOn((prev) => !prev);
-              }}
-            >
-              Turn Video {isVideoOn ? "off" : "on"}
-            </button>
+          <div className="screen">
+            <div className="video-container">
+              <video ref={localFeed} autoPlay playsInline muted />
+            </div>
+            <button onClick={() => {}}>Turn Video</button>
           </div>
 
-          <div className="video-container">
-            <video ref={localFeed} autoPlay playsInline muted />
+          <div className="screen">
+            <div className="video-container">
+              <video ref={localFeed} autoPlay playsInline muted />
+            </div>
             <button
               onClick={() => {
                 setIsVideoOn((prev) => !prev);

@@ -33,16 +33,27 @@ const Guest = (): JSX.Element => {
     <>
       <h1>Guest Screen</h1>
       <div>
-        <div className="local-video-container">
-          <video ref={localFeed} autoPlay playsInline muted />
+        <div className="video-screens-container">
+          <div className="screen">
+            <div className="video-container">
+              <video ref={localFeed} autoPlay playsInline muted />
+            </div>
+            <button onClick={() => {}}>Turn Video</button>
+          </div>
+
+          <div className="screen">
+            <div className="video-container">
+              <video ref={localFeed} autoPlay playsInline muted />
+            </div>
+            <button
+              onClick={() => {
+                setIsVideoOn((prev) => !prev);
+              }}
+            >
+              Turn Video {isVideoOn ? "off" : "on"}
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => {
-            setIsVideoOn((prev) => !prev);
-          }}
-        >
-          Turn Video {isVideoOn ? "off" : "on"}
-        </button>
       </div>
     </>
   );

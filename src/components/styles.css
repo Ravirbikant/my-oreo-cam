@@ -17,6 +17,17 @@ h1 {
   padding: 20px;
 }
 
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.screen button {
+  width: fit-content;
+}
+
 .video-container {
   border: 2px black solid;
   width: 400px;
