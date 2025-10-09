@@ -1,10 +1,29 @@
-.local-video-container {
-  border: 2px white solid;
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+h1 {
+  width: fit-content;
+  margin: 20px auto;
+}
+
+.video-screens-container {
+  width: fit-content;
+  margin: auto;
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+.video-container {
+  border: 2px black solid;
   width: 400px;
   height: 300px;
 }
 
-.local-video-container video {
+.video-container video {
   width: 100%;
   height: 100%;
 }
