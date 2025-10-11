@@ -5,6 +5,22 @@ const Host = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
   const localStream = useRef<MediaStream | null>(null);
   const [isVideoOn, setIsVideoOn] = useState<booleam>(false);
+  const [createdOffer, setCreatedOffer] = useState<string>("");
+  const peerConnection = useRef<RTCPeerConnection | null>(null);
+
+  const handleCreateOffer = async () => {
+    const pc = new RTCPeerConnection();
+
+    localStream.current
+      ?.getTracks()
+      .forEach((track) => pc.addTrack(track, localStream.current));
+
+    const offer = await pc.createOffer();
+    pc.setLocalDescription(offer);
+    setCreatedOffer(JSON.stringify(offer));
+
+    peerConnection.current = pc;
+  };
 
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {
@@ -55,6 +71,9 @@ const Host = (): JSX.Element => {
           </div>
         </div>
       </div>
+
+      <button onClick={handleCreateOffer}>Create an offer</button>
+      <textarea value={createdOffer} readOnly rows={5} cols={30}></textarea>
     </>
   );
 };
