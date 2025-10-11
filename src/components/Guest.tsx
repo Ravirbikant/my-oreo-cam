@@ -5,6 +5,18 @@ const Guest = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
   const localStream = useRef<MediaStream | null>(null);
   const [isVideoOn, setIsVideoOn] = useState<booleam>(false);
+  const [hostOffer, setHostOffer] = useState<string>("");
+
+  const handleCreateAnswer = async () => {
+    const pc = new RTCPeerConnection();
+
+    localStream.current
+      ?.getTracks()
+      .forEach((track) => pc.addTrack(track, localStream.current));
+
+    const offer = JSON.parse(hostOffer);
+    console.log(offer);
+  };
 
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {
@@ -55,6 +67,15 @@ const Guest = (): JSX.Element => {
           </div>
         </div>
       </div>
+
+      <textarea
+        placeholder="Paste offer from host"
+        value={hostOffer}
+        onChange={(e) => setHostOffer(e.target.value)}
+        rows={5}
+        cols={30}
+      />
+      <button onClick={handleCreateAnswer}>Create answer</button>
     </>
   );
 };
