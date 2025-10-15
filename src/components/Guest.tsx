@@ -3,9 +3,11 @@ import "./styles.css";
 
 const Guest = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
+  const remoteFeed = useRef<HTMLVideoElement>(null);
   const localStream = useRef<MediaStream | null>(null);
   const [isVideoOn, setIsVideoOn] = useState<booleam>(false);
   const [hostOffer, setHostOffer] = useState<string>("");
+  const [answerSdp, setAnswerSdp] = useState<string>("");
 
   const handleCreateAnswer = async () => {
     const pc = new RTCPeerConnection();
@@ -14,8 +16,19 @@ const Guest = (): JSX.Element => {
       ?.getTracks()
       .forEach((track) => pc.addTrack(track, localStream.current));
 
+    pc.ontrack = (e) => {
+      if (remoteFeed.current) {
+        remoteFeed.current.srcObject = e.streams[0];
+      }
+    };
+
     const offer = JSON.parse(hostOffer);
-    console.log(offer);
+    await pc.setRemoteDescription(new RTCSessionDescription(offer));
+
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    setAnswerSdp(JSON.stringify(answer));
+    console.log(answer);
   };
 
   useEffect(() => {
@@ -48,7 +61,7 @@ const Guest = (): JSX.Element => {
         <div className="video-screens-container">
           <div className="screen">
             <div className="video-container">
-              <video ref={localFeed} autoPlay playsInline muted />
+              <video ref={remoteFeed} autoPlay playsInline muted />
             </div>
             <button onClick={() => {}}>Turn Video</button>
           </div>
@@ -76,6 +89,8 @@ const Guest = (): JSX.Element => {
         cols={30}
       />
       <button onClick={handleCreateAnswer}>Create answer</button>
+
+      <textarea readOnly value={answerSdp} rows={5} cols={30} />
     </>
   );
 };

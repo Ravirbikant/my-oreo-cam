@@ -3,10 +3,13 @@ import "./styles.css";
 
 const Host = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
+  const remoteFeed = useRef<HTMLVideoElement>(null);
   const localStream = useRef<MediaStream | null>(null);
   const [isVideoOn, setIsVideoOn] = useState<booleam>(false);
   const [createdOffer, setCreatedOffer] = useState<string>("");
   const peerConnection = useRef<RTCPeerConnection | null>(null);
+  const [localCandidates, setLocalCandidates] = useState<string[]>([]);
+  const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
 
   const handleCreateOffer = async () => {
     const pc = new RTCPeerConnection();
@@ -14,6 +17,18 @@ const Host = (): JSX.Element => {
     localStream.current
       ?.getTracks()
       .forEach((track) => pc.addTrack(track, localStream.current));
+
+    pc.ontrack = (e) => {
+      if (remoteFeed.current) {
+        remoteFeed.current.srcObject = e.streams[0];
+      }
+    };
+
+    pc.onicecandidate = (e) => {
+      if (e.candidate) {
+        setLocalCandidates((prev) => [...prev, JSON.stringify(e.candidate)]);
+      }
+    };
 
     const offer = await pc.createOffer();
     pc.setLocalDescription(offer);
@@ -29,6 +44,7 @@ const Host = (): JSX.Element => {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
         });
+
         localStream.current = stream;
         if (localFeed.current) {
           localFeed.current.srcObject = stream;
@@ -59,7 +75,7 @@ const Host = (): JSX.Element => {
 
           <div className="screen">
             <div className="video-container">
-              <video ref={localFeed} autoPlay playsInline muted />
+              <video ref={remoteFeed} autoPlay playsInline muted />
             </div>
             <button
               onClick={() => {
@@ -74,6 +90,15 @@ const Host = (): JSX.Element => {
 
       <button onClick={handleCreateOffer}>Create an offer</button>
       <textarea value={createdOffer} readOnly rows={5} cols={30}></textarea>
+
+      <div>
+        <textarea
+          value={localCandidates.join("\n")}
+          readOnly
+          rows={15}
+          cols={50}
+        ></textarea>
+      </div>
     </>
   );
 };
