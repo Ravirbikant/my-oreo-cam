@@ -10,6 +10,7 @@ const Host = (): JSX.Element => {
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const [localCandidates, setLocalCandidates] = useState<string[]>([]);
   const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
+  const [answerSdp, setAnswerSdp] = useState<string>("");
 
   const handleCreateOffer = async () => {
     const pc = new RTCPeerConnection();
@@ -37,7 +38,15 @@ const Host = (): JSX.Element => {
     peerConnection.current = pc;
   };
 
-  const handleSetAnswer = () => {};
+  const handleSetAnswer = async () => {
+    console.log("Hi");
+    if (!peerConnection.current || !answerSdp) return;
+
+    const answer = JSON.parse(answerSdp);
+    await pc.setRemoteDescription(new RTCSessionDescription(answer));
+
+    console.log("Answer set");
+  };
 
   const handleAddRemoteCandidate = () => {};
 
@@ -94,6 +103,13 @@ const Host = (): JSX.Element => {
 
       <button onClick={handleCreateOffer}>Create an offer</button>
       <textarea value={createdOffer} readOnly rows={5} cols={30}></textarea>
+
+      <textarea
+        value={answerSdp}
+        onChange={(e) => setAnswerSdp(e.target.value)}
+        rows={5}
+        cols={30}
+      ></textarea>
       <button onClick={handleSetAnswer}>Set Answer</button>
 
       <div>
