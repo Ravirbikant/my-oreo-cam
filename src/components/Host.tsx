@@ -37,6 +37,10 @@ const Host = (): JSX.Element => {
     peerConnection.current = pc;
   };
 
+  const handleSetAnswer = () => {};
+
+  const handleAddRemoteCandidate = () => {};
+
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {
       try {
@@ -90,6 +94,7 @@ const Host = (): JSX.Element => {
 
       <button onClick={handleCreateOffer}>Create an offer</button>
       <textarea value={createdOffer} readOnly rows={5} cols={30}></textarea>
+      <button onClick={handleSetAnswer}>Set Answer</button>
 
       <div>
         <textarea
@@ -97,7 +102,19 @@ const Host = (): JSX.Element => {
           readOnly
           rows={15}
           cols={50}
-        ></textarea>
+        />
+
+        <textarea
+          placeholder="Paste remote candidates here"
+          value={remoteCandidates}
+          onChange={(e) => setRemoteCandidates(e.target.value)}
+          rows={15}
+          cols={50}
+        />
+
+        <button onClick={handleAddRemoteCandidate}>
+          Add remote ICE candidates
+        </button>
       </div>
     </>
   );
