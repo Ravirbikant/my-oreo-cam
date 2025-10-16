@@ -39,16 +39,32 @@ const Host = (): JSX.Element => {
   };
 
   const handleSetAnswer = async () => {
-    console.log("Hi");
     if (!peerConnection.current || !answerSdp) return;
 
     const answer = JSON.parse(answerSdp);
-    await pc.setRemoteDescription(new RTCSessionDescription(answer));
+    await peerConnection.current.setRemoteDescription(
+      new RTCSessionDescription(answer)
+    );
 
     console.log("Answer set");
   };
 
-  const handleAddRemoteCandidate = () => {};
+  const handleAddRemoteCandidate = () => {
+    if (!peerConnection.current || !remoteCandidates) return;
+
+    try {
+      const iceCandidates = remoteCandidates.trim().split("\n");
+
+      for (candidate of iceCandidates) {
+        const c = JSON.parse(candidate.trim());
+        await peerConnection.current.addIceCandidate(new RTCIceCandidate(c));
+      }
+
+      setRemoteCandidates("");
+    } catch (err) {
+      console.log("Error : ", err);
+    }
+  };
 
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {

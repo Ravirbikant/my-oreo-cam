@@ -8,6 +8,8 @@ const Guest = (): JSX.Element => {
   const [isVideoOn, setIsVideoOn] = useState<booleam>(false);
   const [hostOffer, setHostOffer] = useState<string>("");
   const [answerSdp, setAnswerSdp] = useState<string>("");
+  const [localCandidates, setLocalCandidates] = useState<string[]>([]);
+  const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
 
   const handleCreateAnswer = async () => {
     const pc = new RTCPeerConnection();
@@ -22,13 +24,20 @@ const Guest = (): JSX.Element => {
       }
     };
 
+    pc.onicecandidate = (e) => {
+      if (e.candidate) {
+        setLocalCandidates((prev) => [...prev, JSON.stringify(e.candidate)]);
+      }
+    };
+
     const offer = JSON.parse(hostOffer);
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
 
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
     setAnswerSdp(JSON.stringify(answer));
-    console.log(answer);
+
+    peerConnection.current = pc;
   };
 
   useEffect(() => {
@@ -91,6 +100,26 @@ const Guest = (): JSX.Element => {
       <button onClick={handleCreateAnswer}>Create answer</button>
 
       <textarea readOnly value={answerSdp} rows={5} cols={30} />
+      <div>
+        <textarea
+          value={localCandidates.join("\n")}
+          readOnly
+          rows={15}
+          cols={50}
+        />
+
+        <textarea
+          placeholder="Paste remote candidates here"
+          value={remoteCandidates}
+          onChange={(e) => setRemoteCandidates(e.target.value)}
+          rows={15}
+          cols={50}
+        />
+
+        <button onClick={handleAddRemoteCandidate}>
+          Add remote ICE candidates
+        </button>
+      </div>
     </>
   );
 };
