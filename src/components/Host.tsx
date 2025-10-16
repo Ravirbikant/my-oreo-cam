@@ -49,13 +49,13 @@ const Host = (): JSX.Element => {
     console.log("Answer set");
   };
 
-  const handleAddRemoteCandidate = () => {
+  const handleAddRemoteCandidate = async () => {
     if (!peerConnection.current || !remoteCandidates) return;
 
     try {
       const iceCandidates = remoteCandidates.trim().split("\n");
 
-      for (candidate of iceCandidates) {
+      for (const candidate of iceCandidates) {
         const c = JSON.parse(candidate.trim());
         await peerConnection.current.addIceCandidate(new RTCIceCandidate(c));
       }

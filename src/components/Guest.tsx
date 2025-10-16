@@ -40,6 +40,23 @@ const Guest = (): JSX.Element => {
     peerConnection.current = pc;
   };
 
+  const handleAddRemoteCandidate = async () => {
+    if (!peerConnection.current || !remoteCandidates) return;
+
+    try {
+      const iceCandidates = remoteCandidates.trim().split("\n");
+
+      for (const candidate of iceCandidates) {
+        const c = JSON.parse(candidate.trim());
+        await peerConnection.current.addIceCandidate(new RTCIceCandidate(c));
+      }
+
+      setRemoteCandidates("");
+    } catch (err) {
+      console.log("Error : ", err);
+    }
+  };
+
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {
       try {
