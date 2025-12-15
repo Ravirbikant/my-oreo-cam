@@ -24,6 +24,8 @@ const Host = (): JSX.Element => {
 
   const handleCreateOffer = async () => {
     const pc = new RTCPeerConnection();
+    const roomId = "test123";
+    const roomRef = doc(db, "rooms", roomId);
 
     localStream.current
       ?.getTracks()
@@ -35,8 +37,16 @@ const Host = (): JSX.Element => {
       }
     };
 
-    pc.onicecandidate = (e) => {
+    pc.onicecandidate = async (e) => {
       if (e.candidate) {
+        try {
+          await updateDoc(roomRef, {
+            hostIceCandidates: arrayUnion(JSON.stringify(e.candidate)),
+          });
+          console.log("Added ice candidate to firebase : ", e.candidate);
+        } catch (err) {
+          console.log("Error adding ice candidiate to firebase : ", err);
+        }
         setLocalCandidates((prev) => [...prev, JSON.stringify(e.candidate)]);
       }
     };
@@ -45,8 +55,6 @@ const Host = (): JSX.Element => {
     pc.setLocalDescription(offer);
     setCreatedOffer(JSON.stringify(offer));
     const offerSdp = JSON.stringify(offer);
-    const roomId = "test123";
-    const roomRef = doc(db, "rooms", roomId);
 
     try {
       await setDoc(
@@ -62,23 +70,6 @@ const Host = (): JSX.Element => {
       console.log("Error writing offer sdp to firebase : ", err);
     }
     peerConnection.current = pc;
-  };
-
-  const handleWriteFirestore = async () => {
-    const roomId = "test123";
-    const roomRef = doc(db, "rooms", roomId);
-    try {
-      console.log("Inside try");
-      await setDoc(roomRef, {
-        roomId,
-        hello: "Hi firebase",
-        createdAt: new Date().toISOString(),
-      });
-
-      console.log("Done");
-    } catch (err) {
-      console.log("Error : ", err);
-    }
   };
 
   const handleSetAnswer = async () => {
@@ -162,7 +153,6 @@ const Host = (): JSX.Element => {
           </div>
         </div>
       </div>
-      <button onClick={handleWriteFirestore}>Write to firestore</button>
       <button onClick={handleCreateOffer}>Create an offer</button>
       <textarea value={createdOffer} readOnly rows={5} cols={30}></textarea>
 
