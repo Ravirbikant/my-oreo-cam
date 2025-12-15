@@ -20,11 +20,10 @@ const Host = (): JSX.Element => {
   const [localCandidates, setLocalCandidates] = useState<string[]>([]);
   const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
   const [answerSdp, setAnswerSdp] = useState<string>("");
-  const [roomId, setRoomId] = useState<string>("");
+  const [currentRoomId, setCurrentRoomId] = useState<string>("");
 
-  const handleCreateOffer = async () => {
+  const handleCreateOffer = async (roomId: string) => {
     const pc = new RTCPeerConnection();
-    const roomId = "test123";
     const roomRef = doc(db, "rooms", roomId);
 
     localStream.current
@@ -70,6 +69,33 @@ const Host = (): JSX.Element => {
       console.log("Error writing offer sdp to firebase : ", err);
     }
     peerConnection.current = pc;
+  };
+
+  const handleCreateRoom = async () => {
+    if (
+      !localFeed.current ||
+      localStream.current.getVideoTracks().length === 0
+    ) {
+      alert("Please turn on the video first");
+      return;
+    }
+
+    const newRoomId = `room-${Date.now()}`;
+    setCurrentRoomId(newRoomId);
+
+    const roomRef = doc(db, "rooms", newRoomId);
+
+    try {
+      await setDoc(roomRef, {
+        roomId: newRoomId,
+        createdAt: serverTimestamp(),
+      });
+      console.log("Room created");
+      await handleCreateOffer(newRoomId);
+      //setup firebase listeners
+    } catch (error) {
+      console.log("Error creating room : ", error);
+    }
   };
 
   const handleSetAnswer = async () => {
@@ -184,6 +210,8 @@ const Host = (): JSX.Element => {
           Add remote ICE candidates
         </button>
       </div>
+      <button onClick={handleCreateRoom}>Create room</button>
+      {currentRoomId && <p>Room Id : {currentRoomId}</p>}
     </>
   );
 };
