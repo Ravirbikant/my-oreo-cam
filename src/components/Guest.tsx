@@ -1,5 +1,13 @@
 import { useRef, useEffect, useState } from "react";
 import "./styles.css";
+import {
+  db,
+  doc,
+  setDoc,
+  updateDoc,
+  onSnapshot,
+  arrayUnion,
+} from "../firebase";
 
 const Guest = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
@@ -11,9 +19,12 @@ const Guest = (): JSX.Element => {
   const [answerSdp, setAnswerSdp] = useState<string>("");
   const [localCandidates, setLocalCandidates] = useState<string[]>([]);
   const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
+  const [roomId, setRoomId] = useState<string>("");
+  const [isInRoom, setIsInRoom] = useState<boolean>(false);
 
-  const handleCreateAnswer = async () => {
+  const handleCreateAnswer = async (roomIdparam: string) => {
     const pc = new RTCPeerConnection();
+    const roomRef = doc(db, "rooms", roomIdparam);
 
     localStream.current
       ?.getTracks()
@@ -25,9 +36,17 @@ const Guest = (): JSX.Element => {
       }
     };
 
-    pc.onicecandidate = (e) => {
+    pc.onicecandidate = async (e) => {
       if (e.candidate) {
         setLocalCandidates((prev) => [...prev, JSON.stringify(e.candidate)]);
+        try {
+          await updateDoc(roomRef, {
+            guestIceCandidates: arrayUnion(JSON.stringify(e.candidate)),
+          });
+          console.log("Adding Guest candidate to firebase : ", e.candidate);
+        } catch (error) {
+          console.log("Error adding Guest ICE candidate to firebase : ", error);
+        }
       }
     };
 
@@ -38,7 +57,72 @@ const Guest = (): JSX.Element => {
     await pc.setLocalDescription(answer);
     setAnswerSdp(JSON.stringify(answer));
 
+    const answerSdpString = JSON.stringify(answer);
+
+    try {
+      await updateDoc(roomRef, {
+        answerSdp: answerSdpString,
+      });
+      console.log("Answer SDP written to Firebase");
+    } catch (error) {
+      console.log("Error writing answer SDP to Firebase : ", error);
+    }
+
     peerConnection.current = pc;
+  };
+
+  const handleEnterRoom = async () => {
+    if (
+      !localStream.current ||
+      localStream.current.getVideoTracks().length === 0
+    ) {
+      alert("Please turn on the video first");
+      return;
+    }
+
+    if (!roomId.trim()) {
+      alert("Please enter the room ID");
+      return;
+    }
+
+    const roomRef = doc(db, "rooms", roomId.trim());
+
+    onSnapshot(roomRef, async (snapshot) => {
+      const data = snapshot.data();
+
+      if (!data) {
+        alert("Room not found");
+        return;
+      }
+
+      if (data.offerSdp && !peerConnection.current) {
+        setHostOffer(data.offerSdp);
+        await handleCreateAnswer(roomId.trim());
+      }
+
+      if (
+        data.hostIceCandidates &&
+        Array.isArray(data.hostIceCandidates) &&
+        peerConnection.current
+      ) {
+        data.hostIceCandidates.forEach(async (candidateStr: string) => {
+          try {
+            const candidate = JSON.parse(candidateStr);
+            await peerConnection.current?.addIceCandidate(
+              new RTCIceCandidate(candidate)
+            );
+            console.log(
+              "Added host ice candidate to Guest peer connection side"
+            );
+          } catch (error) {
+            console.log("Error adding host ICE Candidate : ", error);
+          }
+        });
+      }
+    });
+
+    setIsInRoom(true);
+    console.log("Entered room : ", roomId.trim());
   };
 
   const handleAddRemoteCandidate = async () => {
@@ -139,6 +223,20 @@ const Guest = (): JSX.Element => {
         <button onClick={handleAddRemoteCandidate}>
           Add remote ICE candidates
         </button>
+      </div>
+
+      <div>
+        <input
+          type="text"
+          placeholder="Enter Room ID"
+          value={roomId}
+          onChange={(e) => setRoomId(e.target.value)}
+          disabled={isInRoom}
+        />
+        <button onClick={handleEnterRoom} disabled={!isVideoOn || isInRoom}>
+          Enter Room
+        </button>
+        {isInRoom && <p>In room: {roomId}</p>}
       </div>
     </>
   );
