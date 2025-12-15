@@ -21,6 +21,7 @@ const Host = (): JSX.Element => {
   const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
   const [answerSdp, setAnswerSdp] = useState<string>("");
   const [currentRoomId, setCurrentRoomId] = useState<string>("");
+  const processedAnswerRef = useRef<string>("");
 
   const handleCreateOffer = async (roomId: string) => {
     const pc = new RTCPeerConnection();
@@ -92,10 +93,41 @@ const Host = (): JSX.Element => {
       });
       console.log("Room created");
       await handleCreateOffer(newRoomId);
-      //setup firebase listeners
+      setUpFirebaseListeners(newRoomId);
     } catch (error) {
       console.log("Error creating room : ", error);
     }
+  };
+
+  const setUpFirebaseListeners = (roomId: string) => {
+    const roomRef = doc(db, "rooms", roomId);
+
+    onSnapshot(roomRef, (snapshot) => {
+      const data = snapshot.data();
+
+      if (data?.answerSdp && data.answerSdp !== processedAnswerRef.current) {
+        processedAnswerRef.current = data.answerSdp;
+        setAnswerSdp(data.answerSdp);
+
+        if (peerConnection.current) {
+          const answer = JSON.parse(data.answerSdp);
+          peerConnection.current.setRemoteDescription(
+            new RTCSessionDescription(answer)
+          );
+        }
+      }
+
+      if (data?.guestIceCandidates && Array.isArray(data.guestIceCandidates)) {
+        data.guestIceCandidates.forEach((candidateStr: string) => {
+          if (peerConnection.current) {
+            const candidate = JSON.parse(candidateStr);
+            peerConnection.current.addIceCandidate(
+              new RTCIceCandidate(candidate)
+            );
+          }
+        });
+      }
+    });
   };
 
   const handleSetAnswer = async () => {
@@ -147,6 +179,8 @@ const Host = (): JSX.Element => {
 
     return () => {
       localStream.current?.getTracks().forEach((track) => track.stop());
+
+      //May also add firebase listeners cleanup here
     };
   }, [isVideoOn]);
 
