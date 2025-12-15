@@ -5,7 +5,8 @@ const Guest = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
   const remoteFeed = useRef<HTMLVideoElement>(null);
   const localStream = useRef<MediaStream | null>(null);
-  const [isVideoOn, setIsVideoOn] = useState<booleam>(false);
+  const [isVideoOn, setIsVideoOn] = useState<boolean>(false);
+  const peerConnection = useRef<RTCPeerConnection | null>(null);
   const [hostOffer, setHostOffer] = useState<string>("");
   const [answerSdp, setAnswerSdp] = useState<string>("");
   const [localCandidates, setLocalCandidates] = useState<string[]>([]);
@@ -89,12 +90,14 @@ const Guest = (): JSX.Element => {
             <div className="video-container">
               <video ref={remoteFeed} autoPlay playsInline muted />
             </div>
+            <p>Remote feed</p>
             <button onClick={() => {}}>Turn Video</button>
           </div>
 
           <div className="screen">
             <div className="video-container">
               <video ref={localFeed} autoPlay playsInline muted />
+              <p>Local feed</p>
             </div>
             <button
               onClick={() => {

@@ -1,16 +1,26 @@
 import { useRef, useEffect, useState } from "react";
 import "./styles.css";
+import {
+  db,
+  doc,
+  setDoc,
+  updateDoc,
+  onSnapshot,
+  arrayUnion,
+} from "../firebase";
+import { serverTimestamp } from "firebase/firestore";
 
 const Host = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
   const remoteFeed = useRef<HTMLVideoElement>(null);
   const localStream = useRef<MediaStream | null>(null);
-  const [isVideoOn, setIsVideoOn] = useState<booleam>(false);
+  const [isVideoOn, setIsVideoOn] = useState<boolean>(false);
   const [createdOffer, setCreatedOffer] = useState<string>("");
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const [localCandidates, setLocalCandidates] = useState<string[]>([]);
   const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
   const [answerSdp, setAnswerSdp] = useState<string>("");
+  const [roomId, setRoomId] = useState<string>("");
 
   const handleCreateOffer = async () => {
     const pc = new RTCPeerConnection();
@@ -34,8 +44,41 @@ const Host = (): JSX.Element => {
     const offer = await pc.createOffer();
     pc.setLocalDescription(offer);
     setCreatedOffer(JSON.stringify(offer));
+    const offerSdp = JSON.stringify(offer);
+    const roomId = "test123";
+    const roomRef = doc(db, "rooms", roomId);
 
+    try {
+      await setDoc(
+        roomRef,
+        {
+          offerSdp,
+          createdAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      console.log("Sdp offer written to firebase");
+    } catch (err) {
+      console.log("Error writing offer sdp to firebase : ", err);
+    }
     peerConnection.current = pc;
+  };
+
+  const handleWriteFirestore = async () => {
+    const roomId = "test123";
+    const roomRef = doc(db, "rooms", roomId);
+    try {
+      console.log("Inside try");
+      await setDoc(roomRef, {
+        roomId,
+        hello: "Hi firebase",
+        createdAt: new Date().toISOString(),
+      });
+
+      console.log("Done");
+    } catch (err) {
+      console.log("Error : ", err);
+    }
   };
 
   const handleSetAnswer = async () => {
@@ -99,13 +142,7 @@ const Host = (): JSX.Element => {
             <div className="video-container">
               <video ref={localFeed} autoPlay playsInline muted />
             </div>
-            <button onClick={() => {}}>Turn Video</button>
-          </div>
-
-          <div className="screen">
-            <div className="video-container">
-              <video ref={remoteFeed} autoPlay playsInline muted />
-            </div>
+            <p>Local feed</p>
             <button
               onClick={() => {
                 setIsVideoOn((prev) => !prev);
@@ -114,9 +151,18 @@ const Host = (): JSX.Element => {
               Turn Video {isVideoOn ? "off" : "on"}
             </button>
           </div>
+
+          <div className="screen">
+            <div className="video-container">
+              <video ref={remoteFeed} autoPlay playsInline muted />
+            </div>
+
+            <p>Remote feed</p>
+            <button onClick={() => {}}>Turn Video</button>
+          </div>
         </div>
       </div>
-
+      <button onClick={handleWriteFirestore}>Write to firestore</button>
       <button onClick={handleCreateOffer}>Create an offer</button>
       <textarea value={createdOffer} readOnly rows={5} cols={30}></textarea>
 
@@ -125,7 +171,7 @@ const Host = (): JSX.Element => {
         onChange={(e) => setAnswerSdp(e.target.value)}
         rows={5}
         cols={30}
-      ></textarea>
+      />
       <button onClick={handleSetAnswer}>Set Answer</button>
 
       <div>
