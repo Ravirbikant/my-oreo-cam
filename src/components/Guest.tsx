@@ -39,9 +39,6 @@ const Guest = (): JSX.Element => {
     pc.onicecandidate = async (e) => {
       if (e.candidate) {
         const candidateStr = JSON.stringify(e.candidate);
-        if (processedGuestCandidatesRef.current.has(candidateStr)) {
-          return;
-        }
 
         setLocalCandidates((prev) => [...prev, candidateStr]);
         try {
@@ -122,6 +119,8 @@ const Guest = (): JSX.Element => {
             console.log(
               "Added host ice candidate to Guest peer connection side"
             );
+
+            setRemoteCandidates(data.iceCandidates.join("\n"));
           } catch (error) {
             console.log("Error adding host ICE Candidate : ", error);
           }
@@ -129,7 +128,6 @@ const Guest = (): JSX.Element => {
       }
     });
 
-    setRemoteCandidate(data.iceCandidates.join("\n"));
     setIsInRoom(true);
     console.log("Entered room : ", roomId.trim());
   };
