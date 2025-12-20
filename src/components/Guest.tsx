@@ -21,11 +21,10 @@ const Guest = (): JSX.Element => {
   const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
   const [roomId, setRoomId] = useState<string>("");
   const [isInRoom, setIsInRoom] = useState<boolean>(false);
-  const processedGuestCandidatesRef = useRef<Set<string>>(new Set());
 
   const handleCreateAnswer = async (roomIdparam: string, offerSdp: string) => {
     const pc = new RTCPeerConnection();
-    const roomRef = doc(db, "rooms", roomIdparam);
+    const guestDataRef = doc(db, "rooms", roomIdparam, "guestData", "data");
 
     localStream.current
       ?.getTracks()
@@ -44,12 +43,10 @@ const Guest = (): JSX.Element => {
           return;
         }
 
-        processedGuestCandidatesRef.current.add(candidateStr);
-
         setLocalCandidates((prev) => [...prev, candidateStr]);
         try {
-          await updateDoc(roomRef, {
-            guestIceCandidates: arrayUnion(JSON.stringify(candidateStr)),
+          await updateDoc(guestDataRef, {
+            iceCandidates: arrayUnion(candidateStr),
           });
           console.log("Adding Guest candidate to firebase : ", candidateStr);
         } catch (error) {
@@ -67,9 +64,13 @@ const Guest = (): JSX.Element => {
     const answerSdpString = JSON.stringify(answer);
 
     try {
-      await updateDoc(roomRef, {
-        answerSdp: answerSdpString,
-      });
+      await setDoc(
+        guestDataRef,
+        {
+          answerSdp: answerSdpString,
+        },
+        { merge: true }
+      );
       console.log("Answer SDP written to Firebase");
     } catch (error) {
       console.log("Error writing answer SDP to Firebase : ", error);
@@ -92,9 +93,9 @@ const Guest = (): JSX.Element => {
       return;
     }
 
-    const roomRef = doc(db, "rooms", roomId.trim());
+    const hostDataRef = doc(db, "rooms", roomId.trim(), "hostData", "data");
 
-    onSnapshot(roomRef, async (snapshot) => {
+    onSnapshot(hostDataRef, async (snapshot) => {
       const data = snapshot.data();
 
       if (!data) {
@@ -108,11 +109,11 @@ const Guest = (): JSX.Element => {
       }
 
       if (
-        data.hostIceCandidates &&
-        Array.isArray(data.hostIceCandidates) &&
+        data.iceCandidates &&
+        Array.isArray(data.iceCandidates) &&
         peerConnection.current
       ) {
-        data.hostIceCandidates.forEach(async (candidateStr: string) => {
+        data.iceCandidates.forEach(async (candidateStr: string) => {
           try {
             const candidate = JSON.parse(candidateStr);
             await peerConnection.current?.addIceCandidate(
@@ -128,6 +129,7 @@ const Guest = (): JSX.Element => {
       }
     });
 
+    setRemoteCandidate(data.iceCandidates.join("\n"));
     setIsInRoom(true);
     console.log("Entered room : ", roomId.trim());
   };
