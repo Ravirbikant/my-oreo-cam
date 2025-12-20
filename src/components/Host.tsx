@@ -25,7 +25,7 @@ const Host = (): JSX.Element => {
 
   const handleCreateOffer = async (roomId: string) => {
     const pc = new RTCPeerConnection();
-    const roomRef = doc(db, "rooms", roomId);
+    const hostDataRef = doc(db, "rooms", roomId, "hostData", "data");
 
     localStream.current
       ?.getTracks()
@@ -40,8 +40,8 @@ const Host = (): JSX.Element => {
     pc.onicecandidate = async (e) => {
       if (e.candidate) {
         try {
-          await updateDoc(roomRef, {
-            hostIceCandidates: arrayUnion(JSON.stringify(e.candidate)),
+          await updateDoc(hostDataRef, {
+            iceCandidates: arrayUnion(JSON.stringify(e.candidate)),
           });
           console.log("Added ice candidate to firebase : ", e.candidate);
         } catch (err) {
@@ -58,7 +58,7 @@ const Host = (): JSX.Element => {
 
     try {
       await setDoc(
-        roomRef,
+        hostDataRef,
         {
           offerSdp,
           createdAt: serverTimestamp(),
@@ -100,10 +100,12 @@ const Host = (): JSX.Element => {
   };
 
   const setUpFirebaseListeners = (roomId: string) => {
-    const roomRef = doc(db, "rooms", roomId);
+    const guestDataRef = doc(db, "rooms", roomId, "guestData", "data");
 
-    onSnapshot(roomRef, (snapshot) => {
+    onSnapshot(guestDataRef, (snapshot) => {
       const data = snapshot.data();
+
+      if (!data) return;
 
       if (data?.answerSdp && data.answerSdp !== processedAnswerRef.current) {
         processedAnswerRef.current = data.answerSdp;
@@ -117,15 +119,21 @@ const Host = (): JSX.Element => {
         }
       }
 
-      if (data?.guestIceCandidates && Array.isArray(data.guestIceCandidates)) {
-        data.guestIceCandidates.forEach((candidateStr: string) => {
+      if (data?.iceCandidates && Array.isArray(data.iceCandidates)) {
+        data.iceCandidates.forEach((candidateStr: string) => {
           if (peerConnection.current) {
-            const candidate = JSON.parse(candidateStr);
-            peerConnection.current.addIceCandidate(
-              new RTCIceCandidate(candidate)
-            );
+            try {
+              const candidate = JSON.parse(candidateStr);
+              peerConnection.current.addIceCandidate(
+                new RTCIceCandidate(candidate)
+              );
+            } catch (err) {
+              console.log("Error adding guest ICE candidate : " + err);
+            }
           }
         });
+
+        setRemoteCandidates(data.iceCandidates.join("\n"));
       }
     });
   };
