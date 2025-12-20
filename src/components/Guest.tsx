@@ -21,8 +21,9 @@ const Guest = (): JSX.Element => {
   const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
   const [roomId, setRoomId] = useState<string>("");
   const [isInRoom, setIsInRoom] = useState<boolean>(false);
+  const processedGuestCandidatesRef = useRef<Set<string>>(new Set());
 
-  const handleCreateAnswer = async (roomIdparam: string) => {
+  const handleCreateAnswer = async (roomIdparam: string, offerSdp: string) => {
     const pc = new RTCPeerConnection();
     const roomRef = doc(db, "rooms", roomIdparam);
 
@@ -38,19 +39,25 @@ const Guest = (): JSX.Element => {
 
     pc.onicecandidate = async (e) => {
       if (e.candidate) {
-        setLocalCandidates((prev) => [...prev, JSON.stringify(e.candidate)]);
+        const candidateStr = JSON.stringify(e.candidate);
+        if (processedGuestCandidatesRef.current.has(candidateStr)) {
+          return;
+        }
+
+        processedGuestCandidatesRef.current.add(candidateStr);
+
+        setLocalCandidates((prev) => [...prev, candidateStr]);
         try {
           await updateDoc(roomRef, {
-            guestIceCandidates: arrayUnion(JSON.stringify(e.candidate)),
+            guestIceCandidates: arrayUnion(JSON.stringify(candidateStr)),
           });
-          console.log("Adding Guest candidate to firebase : ", e.candidate);
+          console.log("Adding Guest candidate to firebase : ", candidateStr);
         } catch (error) {
           console.log("Error adding Guest ICE candidate to firebase : ", error);
         }
       }
     };
-
-    const offer = JSON.parse(hostOffer);
+    const offer = JSON.parse(offerSdp);
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
 
     const answer = await pc.createAnswer();
@@ -97,7 +104,7 @@ const Guest = (): JSX.Element => {
 
       if (data.offerSdp && !peerConnection.current) {
         setHostOffer(data.offerSdp);
-        await handleCreateAnswer(roomId.trim());
+        await handleCreateAnswer(roomId.trim(), data.offerSdp);
       }
 
       if (
