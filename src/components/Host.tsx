@@ -22,6 +22,7 @@ const Host = (): JSX.Element => {
   const [answerSdp, setAnswerSdp] = useState<string>("");
   const [currentRoomId, setCurrentRoomId] = useState<string>("");
   const processedAnswerRef = useRef<string>("");
+  const [isGuestVideoOn, setIsGuestVideoOn] = useState<boolean>(true);
 
   const handleCreateOffer = async (roomId: string) => {
     const pc = new RTCPeerConnection();
@@ -216,11 +217,24 @@ const Host = (): JSX.Element => {
 
           <div className="screen">
             <div className="video-container">
-              <video ref={remoteFeed} autoPlay playsInline muted />
+              {!isGuestVideoOn && <div className="placeholder">Guest</div>}
+              <video
+                ref={remoteFeed}
+                autoPlay
+                playsInline
+                muted
+                style={{ opacity: isGuestVideoOn ? 1 : 0 }}
+              />
             </div>
 
             <p>Remote feed</p>
-            <button onClick={() => {}}>Turn Video</button>
+            <button
+              onClick={() => {
+                setIsGuestVideoOn((prev) => setIsGuestVideoOn(!prev));
+              }}
+            >
+              Turn Guest video {isGuestVideoOn ? "off" : "on"}
+            </button>
           </div>
         </div>
       </div>
