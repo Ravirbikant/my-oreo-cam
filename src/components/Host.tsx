@@ -204,7 +204,7 @@ const Host = (): JSX.Element => {
 
   return (
     <>
-      <h1>Host Screen</h1>
+      <h1>Host ka Screen</h1>
       <div>
         <div className="video-screens-container">
           <div className="screen">
