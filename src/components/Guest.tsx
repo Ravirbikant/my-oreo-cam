@@ -170,7 +170,7 @@ const Guest = (): JSX.Element => {
             track.enabled = isVideoOn;
           });
 
-          localStream.current.getVideoTracks().forEach((track) => {
+          localStream.current.getAudioTracks().forEach((track) => {
             track.enabled = isAudioOn;
           });
         }
