@@ -14,7 +14,7 @@ const Host = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
   const remoteFeed = useRef<HTMLVideoElement>(null);
   const localStream = useRef<MediaStream | null>(null);
-  const [isVideoOn, setIsVideoOn] = useState<boolean>(false);
+  const [isVideoOn, setIsVideoOn] = useState<boolean>(true);
   const [createdOffer, setCreatedOffer] = useState<string>("");
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const [localCandidates, setLocalCandidates] = useState<string[]>([]);
@@ -23,6 +23,7 @@ const Host = (): JSX.Element => {
   const [currentRoomId, setCurrentRoomId] = useState<string>("");
   const processedAnswerRef = useRef<string>("");
   const [isGuestVideoOn, setIsGuestVideoOn] = useState<boolean>(true);
+  const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
 
   const handleCreateOffer = async (roomId: string) => {
     const pc = new RTCPeerConnection();
@@ -170,9 +171,10 @@ const Host = (): JSX.Element => {
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {
       try {
-        if (!localStream.current && isVideoOn) {
+        if (!localStream.current && (isVideoOn || isAudioOn)) {
           const stream = await navigator.mediaDevices.getUserMedia({
             video: true,
+            audio: true,
           });
           localStream.current = stream;
 
@@ -185,6 +187,10 @@ const Host = (): JSX.Element => {
           localStream.current.getVideoTracks().forEach((track) => {
             track.enabled = isVideoOn;
           });
+
+          localStream.current.getAudioTracks().forEach((track) => {
+            track.enabled = isAudioOn;
+          });
         }
       } catch (error) {
         console.log("Error : ", error);
@@ -194,7 +200,7 @@ const Host = (): JSX.Element => {
     getLocalFeed();
 
     //May also add firebase listeners cleanup here
-  }, [isVideoOn]);
+  }, [isVideoOn, isAudioOn]);
 
   return (
     <>

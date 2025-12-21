@@ -13,7 +13,7 @@ const Guest = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
   const remoteFeed = useRef<HTMLVideoElement>(null);
   const localStream = useRef<MediaStream | null>(null);
-  const [isVideoOn, setIsVideoOn] = useState<boolean>(false);
+  const [isVideoOn, setIsVideoOn] = useState<boolean>(true);
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const [hostOffer, setHostOffer] = useState<string>("");
   const [answerSdp, setAnswerSdp] = useState<string>("");
@@ -22,6 +22,7 @@ const Guest = (): JSX.Element => {
   const [roomId, setRoomId] = useState<string>("");
   const [isInRoom, setIsInRoom] = useState<boolean>(false);
   const [isHostVideoOn, setIsHostVideoOn] = useState<boolean>(true);
+  const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
 
   const handleCreateAnswer = async (roomIdparam: string, offerSdp: string) => {
     const pc = new RTCPeerConnection();
@@ -153,9 +154,10 @@ const Guest = (): JSX.Element => {
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {
       try {
-        if (!localStream.current && isVideoOn) {
+        if (!localStream.current && (isVideoOn || isAudioOn)) {
           const stream = await navigator.mediaDevices.getUserMedia({
             video: true,
+            audio: true,
           });
           localStream.current = stream;
 
@@ -167,6 +169,10 @@ const Guest = (): JSX.Element => {
           localStream.current.getVideoTracks().forEach((track) => {
             track.enabled = isVideoOn;
           });
+
+          localStream.current.getVideoTracks().forEach((track) => {
+            track.enabled = isAudioOn;
+          });
         }
       } catch (error) {
         console.log("Error : ", error);
@@ -174,7 +180,7 @@ const Guest = (): JSX.Element => {
     };
 
     getLocalFeed();
-  }, [isVideoOn]);
+  }, [isVideoOn, isAudioOn]);
 
   return (
     <>
