@@ -230,7 +230,7 @@ const Guest = (): JSX.Element => {
         </div>
       </div>
 
-      <textarea
+      {/* <textarea
         placeholder="Paste offer from host"
         value={hostOffer}
         onChange={(e) => setHostOffer(e.target.value)}
@@ -259,7 +259,7 @@ const Guest = (): JSX.Element => {
         <button onClick={handleAddRemoteCandidate}>
           Add remote ICE candidates
         </button>
-      </div>
+      </div> */}
 
       <div>
         <input

@@ -251,7 +251,7 @@ const Host = (): JSX.Element => {
           </div>
         </div>
       </div>
-      <button onClick={handleCreateOffer}>Create an offer</button>
+      {/* <button onClick={handleCreateOffer}>Create an offer</button>
       <textarea value={createdOffer} readOnly rows={5} cols={30}></textarea>
 
       <textarea
@@ -281,7 +281,7 @@ const Host = (): JSX.Element => {
         <button onClick={handleAddRemoteCandidate}>
           Add remote ICE candidates
         </button>
-      </div>
+      </div> */}
       <button onClick={handleCreateRoom}>Create room</button>
       {currentRoomId && <p>Room Id : {currentRoomId}</p>}
     </>

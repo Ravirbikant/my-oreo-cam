@@ -10,11 +10,12 @@ h1 {
 }
 
 .video-screens-container {
-  width: fit-content;
+  width: 100vw;
   margin: auto;
   display: flex;
   gap: 20px;
   padding: 20px;
+  justify-content: center;
 }
 
 .screen {
@@ -30,8 +31,8 @@ h1 {
 
 .video-container {
   border: 2px black solid;
-  width: 400px;
-  height: 300px;
+  flex: 1;
+  height: 90vh;
 }
 
 .video-container video {
