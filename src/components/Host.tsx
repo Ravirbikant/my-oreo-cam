@@ -219,6 +219,14 @@ const Host = (): JSX.Element => {
             >
               Turn Video {isVideoOn ? "off" : "on"}
             </button>
+
+            <button
+              onClick={() => {
+                setIsAudioOn((prev) => !prev);
+              }}
+            >
+              Turn Audio {isAudioOn ? "off" : "on"}
+            </button>
           </div>
 
           <div className="screen">
@@ -228,7 +236,6 @@ const Host = (): JSX.Element => {
                 ref={remoteFeed}
                 autoPlay
                 playsInline
-                muted
                 style={{ opacity: isGuestVideoOn ? 1 : 0 }}
               />
             </div>
