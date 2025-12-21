@@ -152,13 +152,20 @@ const Guest = (): JSX.Element => {
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {
       try {
-        if (!isVideoOn) return;
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-        });
-        localStream.current = stream;
-        if (localFeed.current) {
-          localFeed.current.srcObject = stream;
+        if (!localStream.current && isVideoOn) {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          localStream.current = stream;
+
+          if (localFeed.current) {
+            localFeed.current.srcObject = stream;
+          }
+        }
+        if (localStream.current) {
+          localStream.current.getVideoTracks().forEach((track) => {
+            track.enabled = isVideoOn;
+          });
         }
       } catch (error) {
         console.log("Error : ", error);
@@ -166,10 +173,6 @@ const Guest = (): JSX.Element => {
     };
 
     getLocalFeed();
-
-    return () => {
-      localStream.current?.getTracks().forEach((track) => track.stop());
-    };
   }, [isVideoOn]);
 
   return (
