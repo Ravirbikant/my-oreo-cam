@@ -24,6 +24,7 @@ const Host = (): JSX.Element => {
   const [answerSdp, setAnswerSdp] = useState<string>("");
   const [currentRoomId, setCurrentRoomId] = useState<string>("");
   const processedAnswerRef = useRef<string>("");
+  const guestJoinedRef = useRef<boolean>(false);
   const [isGuestVideoOn, setIsGuestVideoOn] = useState<boolean>(true);
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
   const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
@@ -107,30 +108,34 @@ const Host = (): JSX.Element => {
 
   const setUpFirebaseListeners = (roomId: string) => {
     const guestDataRef = doc(db, "rooms", roomId, "guestData", "data");
+    guestJoinedRef.current = false;
 
-    onSnapshot(guestDataRef, (snapshot) => {
+    onSnapshot(guestDataRef, async (snapshot) => {
       if (!snapshot.exists()) {
-        setIsEndingCall(true);
-        if (peerConnection.current) {
-          peerConnection.current.close();
-          peerConnection.current = null;
-        }
-        if (localStream.current) {
-          localStream.current.getTracks().forEach((track) => track.stop());
-          localStream.current = null;
-        }
+        if (guestJoinedRef.current) {
+          setIsEndingCall(true);
+          if (peerConnection.current) {
+            peerConnection.current.close();
+            peerConnection.current = null;
+          }
+          if (localStream.current) {
+            localStream.current.getTracks().forEach((track) => track.stop());
+            localStream.current = null;
+          }
 
-        try {
-          await deleteDoc(doc(db, "rooms", roomId, "hostData", "data"));
-          navigate("/");
-        } catch (err) {
-          console.log("Error cleaning up host data : ", err);
+          try {
+            await deleteDoc(doc(db, "rooms", roomId, "hostData", "data"));
+            navigate("/");
+          } catch (err) {
+            console.log("Error cleaning up host data : ", err);
+          }
+          setIsEndingCall(false);
+          setCurrentRoomId("");
         }
-        setIsEndingCall(false);
-        setCurrentRoomId("");
         return;
       }
 
+      guestJoinedRef.current = true;
       const data = snapshot.data();
 
       if (!data) return;
