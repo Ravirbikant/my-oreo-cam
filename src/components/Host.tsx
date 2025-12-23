@@ -109,6 +109,28 @@ const Host = (): JSX.Element => {
     const guestDataRef = doc(db, "rooms", roomId, "guestData", "data");
 
     onSnapshot(guestDataRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        setIsEndingCall(true);
+        if (peerConnection.current) {
+          peerConnection.current.close();
+          peerConnection.current = null;
+        }
+        if (localStream.current) {
+          localStream.current.getTracks().forEach((track) => track.stop());
+          localStream.current = null;
+        }
+
+        try {
+          await deleteDoc(doc(db, "rooms", roomId, "hostData", "data"));
+          navigate("/");
+        } catch (err) {
+          console.log("Error cleaning up host data : ", err);
+        }
+        setIsEndingCall(false);
+        setCurrentRoomId("");
+        return;
+      }
+
       const data = snapshot.data();
 
       if (!data) return;
