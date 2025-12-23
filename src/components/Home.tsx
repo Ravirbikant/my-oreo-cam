@@ -1,12 +1,13 @@
 import { useState } from "react";
 import "./styles.css";
+import { useNavigate } from "react-router-dom";
 
 const Home = (): React.JSX.Element => {
   const [name, setName] = useState<string>("");
   const [roomId, setRoomId] = useState<string>("");
-
+  const navigate = useNavigate();
   const handleCreateRoom = () => {
-    console.log("Create room clicked with name:", name);
+    navigate(`/host`);
   };
 
   const handleJoinRoom = () => {

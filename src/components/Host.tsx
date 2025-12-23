@@ -28,6 +28,8 @@ const Host = (): JSX.Element => {
   const [isGuestVideoOn, setIsGuestVideoOn] = useState<boolean>(true);
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
   const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
+  const [isStreamReady, setIsStreamReady] = useState<boolean>(false);
+  const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleCreateOffer = async (roomId: string) => {
@@ -90,6 +92,7 @@ const Host = (): JSX.Element => {
 
     const newRoomId = `room-${Date.now()}`;
     setCurrentRoomId(newRoomId);
+    navigate(`/host?roomId=${newRoomId}`, { replace: true });
 
     const roomRef = doc(db, "rooms", newRoomId);
 
@@ -248,6 +251,7 @@ const Host = (): JSX.Element => {
             track.enabled = isAudioOn;
           });
         }
+        setIsStreamReady(true);
       } catch (error) {
         console.log("Error : ", error);
       }
@@ -257,6 +261,30 @@ const Host = (): JSX.Element => {
 
     //May also add firebase listeners cleanup here
   }, [isVideoOn, isAudioOn]);
+
+  useEffect(() => {
+    const autoCreateRoom = async () => {
+      if (
+        currentRoomId ||
+        isCreatingRoom ||
+        !isStreamReady ||
+        !localStream.current
+      )
+        return;
+
+      setIsCreatingRoom(true);
+      try {
+        await handleCreateRoom();
+      } catch (error) {
+        console.log("Error creating room:", error);
+        alert("Failed to create room. Please try again.");
+      } finally {
+        setIsCreatingRoom(false);
+      }
+    };
+
+    autoCreateRoom();
+  }, [isStreamReady]);
 
   return (
     <>
@@ -306,8 +334,6 @@ const Host = (): JSX.Element => {
             </button>
           </div>
         </div>
-
-        <button onClick={handleEndCall}>End call</button>
       </div>
       {/* <button onClick={handleCreateOffer}>Create an offer</button>
       <textarea value={createdOffer} readOnly rows={5} cols={30}></textarea>
@@ -340,8 +366,21 @@ const Host = (): JSX.Element => {
           Add remote ICE candidates
         </button>
       </div> */}
-      <button onClick={handleCreateRoom}>Create room</button>
-      {currentRoomId && <p>Room Id : {currentRoomId}</p>}
+      {currentRoomId && (
+        <div>
+          <p>Room Id : {currentRoomId}</p>
+          <button
+            onClick={() => {
+              const link = `${window.location.origin}/guest?roomId=${currentRoomId}`;
+              navigator.clipboard.writeText(link);
+              alert("Room link copied to clipboard!");
+            }}
+          >
+            Copy Room Link
+          </button>
+        </div>
+      )}
+      <button onClick={handleEndCall}>End call</button>
     </>
   );
 };
