@@ -7,7 +7,9 @@ import {
   updateDoc,
   onSnapshot,
   arrayUnion,
+  deleteDoc,
 } from "../firebase";
+import { useNavigate } from "react-router-dom";
 
 const Guest = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
@@ -23,6 +25,8 @@ const Guest = (): JSX.Element => {
   const [isInRoom, setIsInRoom] = useState<boolean>(false);
   const [isHostVideoOn, setIsHostVideoOn] = useState<boolean>(true);
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
+  const [isEndingCall, setIsEndingCall] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   const handleCreateAnswer = async (roomIdparam: string, offerSdp: string) => {
     const pc = new RTCPeerConnection();
@@ -93,8 +97,32 @@ const Guest = (): JSX.Element => {
     }
 
     const hostDataRef = doc(db, "rooms", roomId.trim(), "hostData", "data");
+    const guestDataRef = doc(db, "rooms", roomId.trim(), "guestData", "data");
 
     onSnapshot(hostDataRef, async (snapshot) => {
+      if (!snapshot.exists()) {
+        setIsEndingCall(true);
+        if (peerConnection.current) {
+          peerConnection.current.close();
+          peerConnection.current = null;
+        }
+        if (localStream.current) {
+          localStream.current.getTracks().forEach((track) => track.stop());
+          localStream.current = null;
+        }
+
+        try {
+          await deleteDoc(guestDataRef);
+          navigate("/");
+        } catch (err) {
+          console.log("Error clearning up guest data : ", err);
+        }
+        setIsEndingCall(false);
+        setIsInRoom(false);
+        setRoomId("");
+        return;
+      }
+
       const data = snapshot.data();
 
       if (!data) {
