@@ -25,7 +25,7 @@ const Guest = (): JSX.Element => {
   const [isInRoom, setIsInRoom] = useState<boolean>(false);
   const [isHostVideoOn, setIsHostVideoOn] = useState<boolean>(true);
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
-  const [isEndingCall, setIsEndingCall] = useState<boolean>(true);
+  const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleCreateAnswer = async (roomIdparam: string, offerSdp: string) => {
@@ -160,6 +160,31 @@ const Guest = (): JSX.Element => {
 
     setIsInRoom(true);
     console.log("Entered room : ", roomId.trim());
+  };
+
+  const handleEndCall = async () => {
+    if (!roomId || isEndingCall) return;
+
+    setIsEndingCall(true);
+
+    if (peerConnection.current) {
+      peerConnection.current.close();
+      peerConnection.current = null;
+    }
+
+    if (localStream.current) {
+      localStream.current.getTracks().forEach((track) => track.stop());
+      localStream.current = null;
+    }
+
+    try {
+      await deleteDoc(doc(db, "rooms", roomId, "guestData", "data"));
+      setRoomId("");
+      navigate("/");
+    } catch (err) {
+      console.log("Error ending the call : ", err);
+    }
+    setIsEndingCall(false);
   };
 
   const handleAddRemoteCandidate = async () => {
@@ -300,7 +325,17 @@ const Guest = (): JSX.Element => {
         <button onClick={handleEnterRoom} disabled={!isVideoOn || isInRoom}>
           Enter Room
         </button>
-        {isInRoom && <p>In room: {roomId}</p>}
+        {isInRoom && (
+          <>
+            <p>In room: {roomId}</p>
+            <button
+              onClick={handleEndCall}
+              disabled={isEndingCall || !isInRoom}
+            >
+              {isEndingCall ? "Ending call..." : "End Call"}
+            </button>
+          </>
+        )}
       </div>
     </>
   );
