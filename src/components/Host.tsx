@@ -7,8 +7,10 @@ import {
   updateDoc,
   onSnapshot,
   arrayUnion,
+  deleteDoc,
 } from "../firebase";
 import { serverTimestamp } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 const Host = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
@@ -24,6 +26,8 @@ const Host = (): JSX.Element => {
   const processedAnswerRef = useRef<string>("");
   const [isGuestVideoOn, setIsGuestVideoOn] = useState<boolean>(true);
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
+  const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleCreateOffer = async (roomId: string) => {
     const pc = new RTCPeerConnection();
@@ -140,6 +144,31 @@ const Host = (): JSX.Element => {
     });
   };
 
+  const handleEndCall = async () => {
+    if (!currentRoomId || isEndingCall) return;
+
+    setIsEndingCall(true);
+
+    if (peerConnection.current) {
+      peerConnection.current.close();
+      peerConnection.current = null;
+    }
+
+    if (localStream.current) {
+      localStream.current.getTracks().forEach((track) => track.stop());
+      localStream.current = null;
+    }
+
+    try {
+      await deleteDoc(doc(db, "rooms", currentRoomId, "hostData", "data"));
+      setCurrentRoomId("");
+      navigate("/");
+    } catch (err) {
+      console.log("Error ending the call : ", err);
+    }
+    setIsEndingCall(false);
+  };
+
   const handleSetAnswer = async () => {
     if (!peerConnection.current || !answerSdp) return;
 
@@ -250,6 +279,8 @@ const Host = (): JSX.Element => {
             </button>
           </div>
         </div>
+
+        <button onClick={handleEndCall}>End call</button>
       </div>
       {/* <button onClick={handleCreateOffer}>Create an offer</button>
       <textarea value={createdOffer} readOnly rows={5} cols={30}></textarea>

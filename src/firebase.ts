@@ -1,3 +1,4 @@
+import { deleteDoc } from "firebase/firestore";
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import {
@@ -36,4 +37,5 @@ export {
   updateDoc,
   arrayUnion,
   serverTimestamp,
+  deleteDoc,
 };
