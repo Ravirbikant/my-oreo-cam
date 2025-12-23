@@ -1,18 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./styles.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Home = (): React.JSX.Element => {
   const [name, setName] = useState<string>("");
   const [roomId, setRoomId] = useState<string>("");
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const handleCreateRoom = () => {
     navigate(`/host`);
   };
 
   const handleJoinRoom = () => {
-    console.log("Join room clicked with name:", name, "roomId:", roomId);
+    navigate(`/guest?roomId=${roomId}`);
   };
+
+  useEffect(() => {
+    const roomId = searchParams.get("roomId");
+    if (roomId) {
+      setRoomId(roomId);
+    }
+  }, [searchParams]);
 
   return (
     <div className="home-container">

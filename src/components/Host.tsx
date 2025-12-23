@@ -371,7 +371,7 @@ const Host = (): JSX.Element => {
           <p>Room Id : {currentRoomId}</p>
           <button
             onClick={() => {
-              const link = `${window.location.origin}/guest?roomId=${currentRoomId}`;
+              const link = `${window.location.origin}?roomId=${currentRoomId}`;
               navigator.clipboard.writeText(link);
               alert("Room link copied to clipboard!");
             }}
