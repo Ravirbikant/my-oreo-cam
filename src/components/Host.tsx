@@ -17,19 +17,13 @@ const Host = (): JSX.Element => {
   const remoteFeed = useRef<HTMLVideoElement>(null);
   const localStream = useRef<MediaStream | null>(null);
   const [isVideoOn, setIsVideoOn] = useState<boolean>(true);
-  const [createdOffer, setCreatedOffer] = useState<string>("");
   const peerConnection = useRef<RTCPeerConnection | null>(null);
-  const [localCandidates, setLocalCandidates] = useState<string[]>([]);
-  const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
-  const [answerSdp, setAnswerSdp] = useState<string>("");
   const [currentRoomId, setCurrentRoomId] = useState<string>("");
   const processedAnswerRef = useRef<string>("");
   const guestJoinedRef = useRef<boolean>(false);
   const [isGuestVideoOn, setIsGuestVideoOn] = useState<boolean>(true);
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
   const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
-  const [isStreamReady, setIsStreamReady] = useState<boolean>(false);
-  const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleCreateOffer = async (roomId: string) => {
@@ -56,13 +50,11 @@ const Host = (): JSX.Element => {
         } catch (err) {
           console.log("Error adding ice candidiate to firebase : ", err);
         }
-        setLocalCandidates((prev) => [...prev, JSON.stringify(e.candidate)]);
       }
     };
 
     const offer = await pc.createOffer();
     pc.setLocalDescription(offer);
-    setCreatedOffer(JSON.stringify(offer));
     const offerSdp = JSON.stringify(offer);
 
     try {
@@ -145,7 +137,6 @@ const Host = (): JSX.Element => {
 
       if (data?.answerSdp && data.answerSdp !== processedAnswerRef.current) {
         processedAnswerRef.current = data.answerSdp;
-        setAnswerSdp(data.answerSdp);
 
         if (peerConnection.current) {
           const answer = JSON.parse(data.answerSdp);
@@ -168,8 +159,6 @@ const Host = (): JSX.Element => {
             }
           }
         });
-
-        setRemoteCandidates(data.iceCandidates.join("\n"));
       }
     });
   };
@@ -199,34 +188,6 @@ const Host = (): JSX.Element => {
     setIsEndingCall(false);
   };
 
-  const handleSetAnswer = async () => {
-    if (!peerConnection.current || !answerSdp) return;
-
-    const answer = JSON.parse(answerSdp);
-    await peerConnection.current.setRemoteDescription(
-      new RTCSessionDescription(answer)
-    );
-
-    console.log("Answer set");
-  };
-
-  const handleAddRemoteCandidate = async () => {
-    if (!peerConnection.current || !remoteCandidates) return;
-
-    try {
-      const iceCandidates = remoteCandidates.trim().split("\n");
-
-      for (const candidate of iceCandidates) {
-        const c = JSON.parse(candidate.trim());
-        await peerConnection.current.addIceCandidate(new RTCIceCandidate(c));
-      }
-
-      setRemoteCandidates("");
-    } catch (err) {
-      console.log("Error : ", err);
-    }
-  };
-
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {
       try {
@@ -251,7 +212,6 @@ const Host = (): JSX.Element => {
             track.enabled = isAudioOn;
           });
         }
-        setIsStreamReady(true);
       } catch (error) {
         console.log("Error : ", error);
       }
@@ -303,7 +263,7 @@ const Host = (): JSX.Element => {
             <p>Remote feed</p>
             <button
               onClick={() => {
-                setIsGuestVideoOn((prev) => setIsGuestVideoOn(!prev));
+                setIsGuestVideoOn((prev) => !prev);
               }}
             >
               Turn Guest video {isGuestVideoOn ? "off" : "on"}
@@ -311,37 +271,6 @@ const Host = (): JSX.Element => {
           </div>
         </div>
       </div>
-      {/* <button onClick={handleCreateOffer}>Create an offer</button>
-      <textarea value={createdOffer} readOnly rows={5} cols={30}></textarea>
-
-      <textarea
-        value={answerSdp}
-        onChange={(e) => setAnswerSdp(e.target.value)}
-        rows={5}
-        cols={30}
-      />
-      <button onClick={handleSetAnswer}>Set Answer</button>
-
-      <div>
-        <textarea
-          value={localCandidates.join("\n")}
-          readOnly
-          rows={15}
-          cols={50}
-        />
-
-        <textarea
-          placeholder="Paste remote candidates here"
-          value={remoteCandidates}
-          onChange={(e) => setRemoteCandidates(e.target.value)}
-          rows={15}
-          cols={50}
-        />
-
-        <button onClick={handleAddRemoteCandidate}>
-          Add remote ICE candidates
-        </button>
-      </div> */}
 
       {!currentRoomId ? (
         <button
