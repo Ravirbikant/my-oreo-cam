@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState } from "react";
-import "./styles.css";
 import {
   db,
   doc,
@@ -11,6 +10,7 @@ import {
 } from "../firebase";
 import { serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import "./styles.css";
 
 const Host = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
@@ -224,61 +224,55 @@ const Host = (): JSX.Element => {
 
   return (
     <>
-      <h1>Host ka Screen</h1>
       <div>
-        <div className="video-screens-container">
-          <div className="screen">
-            <div className="video-container">
-              <video ref={localFeed} autoPlay playsInline muted />
-            </div>
-            <p>Local feed</p>
-            <button
-              onClick={() => {
-                setIsVideoOn((prev) => !prev);
-              }}
-            >
-              Turn Video {isVideoOn ? "off" : "on"}
-            </button>
+        <div className="remote-feed-container">
+          <video
+            ref={remoteFeed}
+            autoPlay
+            playsInline
+            style={{ opacity: isGuestVideoOn ? 1 : 0 }}
+          />
 
-            <button
-              onClick={() => {
-                setIsAudioOn((prev) => !prev);
-              }}
-            >
-              Turn Audio {isAudioOn ? "off" : "on"}
-            </button>
-          </div>
-
-          <div className="screen">
-            <div className="video-container">
-              {!isGuestVideoOn && <div className="placeholder">Guest</div>}
-              <video
-                ref={remoteFeed}
-                autoPlay
-                playsInline
-                style={{ opacity: isGuestVideoOn ? 1 : 0 }}
-              />
-            </div>
-
-            <p>Remote feed</p>
-            <button
-              onClick={() => {
-                setIsGuestVideoOn((prev) => !prev);
-              }}
-            >
-              Turn Guest video {isGuestVideoOn ? "off" : "on"}
-            </button>
-          </div>
+          <p>Remote feed</p>
+          <button
+            onClick={() => {
+              setIsGuestVideoOn((prev) => !prev);
+            }}
+          >
+            Turn Guest video {isGuestVideoOn ? "off" : "on"}
+          </button>
         </div>
+
+        <div className="header">
+          <h1>Host ka Screen</h1>
+          <button onClick={() => navigate("/guest")}>
+            Enter as guest instead
+          </button>
+        </div>
+
+        <div className="local-feed-container">
+          <video ref={localFeed} autoPlay playsInline muted />
+        </div>
+
+        <button
+          onClick={() => {
+            setIsVideoOn((prev) => !prev);
+          }}
+        >
+          Turn Video {isVideoOn ? "off" : "on"}
+        </button>
+
+        <button
+          onClick={() => {
+            setIsAudioOn((prev) => !prev);
+          }}
+        >
+          Turn Audio {isAudioOn ? "off" : "on"}
+        </button>
       </div>
 
       {!currentRoomId ? (
-        <button
-          onClick={handleCreateRoom}
-          className="home-button home-button-create"
-        >
-          Create Room
-        </button>
+        <button onClick={handleCreateRoom}>Create Room</button>
       ) : (
         <div>
           <p>Room Id : {currentRoomId}</p>

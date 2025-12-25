@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState } from "react";
-import "./styles.css";
 import {
   db,
   doc,
@@ -228,9 +227,9 @@ const Guest = (): JSX.Element => {
     <>
       <h1>Guest Screen</h1>
       <div>
-        <div className="video-screens-container">
-          <div className="screen">
-            <div className="video-container">
+        <div>
+          <div>
+            <div>
               {!isHostVideoOn && <div>Host</div>}
               <video
                 ref={remoteFeed}
@@ -249,8 +248,8 @@ const Guest = (): JSX.Element => {
             </button>
           </div>
 
-          <div className="screen">
-            <div className="video-container">
+          <div>
+            <div>
               <video ref={localFeed} autoPlay playsInline muted />
               <p>Local feed</p>
             </div>
