@@ -20,10 +20,6 @@ const Guest = (): JSX.Element => {
   const localStream = useRef<MediaStream | null>(null);
   const [isVideoOn, setIsVideoOn] = useState<boolean>(true);
   const peerConnection = useRef<RTCPeerConnection | null>(null);
-  const [hostOffer, setHostOffer] = useState<string>("");
-  const [answerSdp, setAnswerSdp] = useState<string>("");
-  const [localCandidates, setLocalCandidates] = useState<string[]>([]);
-  const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
   const roomId = useRef<string>(searchParams.get("roomId") || "");
   const [isInRoom, setIsInRoom] = useState<boolean>(false);
   const [isHostVideoOn, setIsHostVideoOn] = useState<boolean>(true);
@@ -49,7 +45,6 @@ const Guest = (): JSX.Element => {
       if (e.candidate) {
         const candidateStr = JSON.stringify(e.candidate);
 
-        setLocalCandidates((prev) => [...prev, candidateStr]);
         try {
           await updateDoc(guestDataRef, {
             iceCandidates: arrayUnion(candidateStr),
@@ -65,7 +60,6 @@ const Guest = (): JSX.Element => {
 
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
-    setAnswerSdp(JSON.stringify(answer));
 
     const answerSdpString = JSON.stringify(answer);
 
@@ -146,7 +140,6 @@ const Guest = (): JSX.Element => {
       }
 
       if (data.offerSdp && !peerConnection.current) {
-        setHostOffer(data.offerSdp);
         await handleCreateAnswer(roomId.current.trim(), data.offerSdp);
       }
 
@@ -164,8 +157,6 @@ const Guest = (): JSX.Element => {
             console.log(
               "Added host ice candidate to Guest peer connection side"
             );
-
-            setRemoteCandidates(data.iceCandidates.join("\n"));
           } catch (error) {
             console.log("Error adding host ICE Candidate : ", error);
           }
@@ -200,23 +191,6 @@ const Guest = (): JSX.Element => {
       console.log("Error ending the call : ", err);
     }
     setIsEndingCall(false);
-  };
-
-  const handleAddRemoteCandidate = async () => {
-    if (!peerConnection.current || !remoteCandidates) return;
-
-    try {
-      const iceCandidates = remoteCandidates.trim().split("\n");
-
-      for (const candidate of iceCandidates) {
-        const c = JSON.parse(candidate.trim());
-        await peerConnection.current.addIceCandidate(new RTCIceCandidate(c));
-      }
-
-      setRemoteCandidates("");
-    } catch (err) {
-      console.log("Error : ", err);
-    }
   };
 
   useEffect(() => {
@@ -297,37 +271,6 @@ const Guest = (): JSX.Element => {
           </div>
         </div>
       </div>
-
-      {/* <textarea
-        placeholder="Paste offer from host"
-        value={hostOffer}
-        onChange={(e) => setHostOffer(e.target.value)}
-        rows={5}
-        cols={30}
-      />
-      <button onClick={handleCreateAnswer}>Create answer</button>
-
-      <textarea readOnly value={answerSdp} rows={5} cols={30} />
-      <div>
-        <textarea
-          value={localCandidates.join("\n")}
-          readOnly
-          rows={15}
-          cols={50}
-        />
-
-        <textarea
-          placeholder="Paste remote candidates here"
-          value={remoteCandidates}
-          onChange={(e) => setRemoteCandidates(e.target.value)}
-          rows={15}
-          cols={50}
-        />
-
-        <button onClick={handleAddRemoteCandidate}>
-          Add remote ICE candidates
-        </button>
-      </div> */}
 
       <div>
         <input
