@@ -11,6 +11,13 @@ import {
 import { serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import "./styles.css";
+import {
+  FaMicrophone,
+  FaMicrophoneSlash,
+  FaVideo,
+  FaVideoSlash,
+} from "react-icons/fa";
+import { MdCallEnd } from "react-icons/md";
 
 const Host = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
@@ -233,7 +240,6 @@ const Host = (): JSX.Element => {
             style={{ opacity: isGuestVideoOn ? 1 : 0 }}
           />
 
-          <p>Remote feed</p>
           <button
             onClick={() => {
               setIsGuestVideoOn((prev) => !prev);
@@ -253,21 +259,36 @@ const Host = (): JSX.Element => {
         <div className="local-feed-container">
           <video ref={localFeed} autoPlay playsInline muted />
         </div>
+      </div>
 
+      <div className="action-buttons">
         <button
+          className="action-icon-button"
           onClick={() => {
             setIsVideoOn((prev) => !prev);
           }}
         >
-          Turn Video {isVideoOn ? "off" : "on"}
+          {isVideoOn ? (
+            <FaVideo className="icon" />
+          ) : (
+            <FaVideoSlash className="icon" />
+          )}
         </button>
 
         <button
           onClick={() => {
             setIsAudioOn((prev) => !prev);
           }}
+          className="action-icon-button"
         >
-          Turn Audio {isAudioOn ? "off" : "on"}
+          {isAudioOn ? (
+            <FaMicrophone className="icon" />
+          ) : (
+            <FaMicrophoneSlash className="icon" />
+          )}
+        </button>
+        <button onClick={handleEndCall} className="action-icon-button">
+          <MdCallEnd className="icon" />
         </button>
       </div>
 
@@ -285,7 +306,6 @@ const Host = (): JSX.Element => {
           >
             Copy Room Link
           </button>
-          <button onClick={handleEndCall}>End call</button>
         </div>
       )}
     </>
