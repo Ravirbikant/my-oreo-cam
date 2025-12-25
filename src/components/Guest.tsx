@@ -128,7 +128,7 @@ const Guest = (): JSX.Element => {
 
         try {
           await deleteDoc(guestDataRef);
-          navigate("/");
+          navigate("/call-ended");
         } catch (err) {
           console.log("Error clearning up guest data : ", err);
         }
@@ -195,7 +195,7 @@ const Guest = (): JSX.Element => {
     try {
       await deleteDoc(doc(db, "rooms", roomId.current, "guestData", "data"));
       roomId.current = "";
-      navigate("/");
+      navigate("/call-ended");
     } catch (err) {
       console.log("Error ending the call : ", err);
     }

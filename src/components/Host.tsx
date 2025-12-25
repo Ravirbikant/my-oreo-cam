@@ -128,7 +128,7 @@ const Host = (): JSX.Element => {
 
           try {
             await deleteDoc(doc(db, "rooms", roomId, "hostData", "data"));
-            navigate("/");
+            navigate("/call-ended");
           } catch (err) {
             console.log("Error cleaning up host data : ", err);
           }
@@ -192,7 +192,7 @@ const Host = (): JSX.Element => {
     try {
       await deleteDoc(doc(db, "rooms", currentRoomId, "hostData", "data"));
       setCurrentRoomId("");
-      navigate("/");
+      navigate("/call-ended");
     } catch (err) {
       console.log("Error ending the call : ", err);
     }
@@ -342,13 +342,15 @@ const Host = (): JSX.Element => {
           Add remote ICE candidates
         </button>
       </div> */}
-      <button
-        onClick={handleCreateRoom}
-        className="home-button home-button-create"
-      >
-        Create Room
-      </button>
-      {currentRoomId && (
+
+      {!currentRoomId ? (
+        <button
+          onClick={handleCreateRoom}
+          className="home-button home-button-create"
+        >
+          Create Room
+        </button>
+      ) : (
         <div>
           <p>Room Id : {currentRoomId}</p>
           <button
@@ -360,9 +362,9 @@ const Host = (): JSX.Element => {
           >
             Copy Room Link
           </button>
+          <button onClick={handleEndCall}>End call</button>
         </div>
       )}
-      <button onClick={handleEndCall}>End call</button>
     </>
   );
 };
