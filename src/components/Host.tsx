@@ -262,30 +262,6 @@ const Host = (): JSX.Element => {
     //May also add firebase listeners cleanup here
   }, [isVideoOn, isAudioOn]);
 
-  useEffect(() => {
-    const autoCreateRoom = async () => {
-      if (
-        currentRoomId ||
-        isCreatingRoom ||
-        !isStreamReady ||
-        !localStream.current
-      )
-        return;
-
-      setIsCreatingRoom(true);
-      try {
-        await handleCreateRoom();
-      } catch (error) {
-        console.log("Error creating room:", error);
-        alert("Failed to create room. Please try again.");
-      } finally {
-        setIsCreatingRoom(false);
-      }
-    };
-
-    autoCreateRoom();
-  }, [isStreamReady]);
-
   return (
     <>
       <h1>Host ka Screen</h1>
@@ -366,12 +342,18 @@ const Host = (): JSX.Element => {
           Add remote ICE candidates
         </button>
       </div> */}
+      <button
+        onClick={handleCreateRoom}
+        className="home-button home-button-create"
+      >
+        Create Room
+      </button>
       {currentRoomId && (
         <div>
           <p>Room Id : {currentRoomId}</p>
           <button
             onClick={() => {
-              const link = `${window.location.origin}?roomId=${currentRoomId}`;
+              const link = `${window.location.origin}/guest?roomId=${currentRoomId}`;
               navigator.clipboard.writeText(link);
               alert("Room link copied to clipboard!");
             }}

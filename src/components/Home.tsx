@@ -33,13 +33,7 @@ const Home = (): React.JSX.Element => {
           onChange={(e) => setName(e.target.value)}
           className="home-input"
         />
-        <button
-          onClick={handleCreateRoom}
-          disabled={!name.trim()}
-          className="home-button home-button-create"
-        >
-          Create Room
-        </button>
+
         <div className="home-join-row">
           <input
             type="text"
