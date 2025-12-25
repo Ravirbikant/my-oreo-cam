@@ -10,8 +10,11 @@ import {
   deleteDoc,
 } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 const Guest = (): JSX.Element => {
+  const [searchParams] = useSearchParams();
+
   const localFeed = useRef<HTMLVideoElement>(null);
   const remoteFeed = useRef<HTMLVideoElement>(null);
   const localStream = useRef<MediaStream | null>(null);
@@ -21,7 +24,7 @@ const Guest = (): JSX.Element => {
   const [answerSdp, setAnswerSdp] = useState<string>("");
   const [localCandidates, setLocalCandidates] = useState<string[]>([]);
   const [remoteCandidates, setRemoteCandidates] = useState<string[]>([]);
-  const [roomId, setRoomId] = useState<string>("");
+  const roomId = useRef<string>(searchParams.get("roomId") || "");
   const [isInRoom, setIsInRoom] = useState<boolean>(false);
   const [isHostVideoOn, setIsHostVideoOn] = useState<boolean>(true);
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
@@ -91,13 +94,25 @@ const Guest = (): JSX.Element => {
       return;
     }
 
-    if (!roomId.trim()) {
+    if (!roomId.current.trim()) {
       alert("Please enter the room ID");
       return;
     }
 
-    const hostDataRef = doc(db, "rooms", roomId.trim(), "hostData", "data");
-    const guestDataRef = doc(db, "rooms", roomId.trim(), "guestData", "data");
+    const hostDataRef = doc(
+      db,
+      "rooms",
+      roomId.current.trim(),
+      "hostData",
+      "data"
+    );
+    const guestDataRef = doc(
+      db,
+      "rooms",
+      roomId.current.trim(),
+      "guestData",
+      "data"
+    );
 
     onSnapshot(hostDataRef, async (snapshot) => {
       if (!snapshot.exists()) {
@@ -119,7 +134,7 @@ const Guest = (): JSX.Element => {
         }
         setIsEndingCall(false);
         setIsInRoom(false);
-        setRoomId("");
+        roomId.current = "";
         return;
       }
 
@@ -132,7 +147,7 @@ const Guest = (): JSX.Element => {
 
       if (data.offerSdp && !peerConnection.current) {
         setHostOffer(data.offerSdp);
-        await handleCreateAnswer(roomId.trim(), data.offerSdp);
+        await handleCreateAnswer(roomId.current.trim(), data.offerSdp);
       }
 
       if (
@@ -159,11 +174,11 @@ const Guest = (): JSX.Element => {
     });
 
     setIsInRoom(true);
-    console.log("Entered room : ", roomId.trim());
+    console.log("Entered room : ", roomId.current.trim());
   };
 
   const handleEndCall = async () => {
-    if (!roomId || isEndingCall) return;
+    if (!roomId.current || isEndingCall) return;
 
     setIsEndingCall(true);
 
@@ -178,8 +193,8 @@ const Guest = (): JSX.Element => {
     }
 
     try {
-      await deleteDoc(doc(db, "rooms", roomId, "guestData", "data"));
-      setRoomId("");
+      await deleteDoc(doc(db, "rooms", roomId.current, "guestData", "data"));
+      roomId.current = "";
       navigate("/");
     } catch (err) {
       console.log("Error ending the call : ", err);
@@ -318,8 +333,8 @@ const Guest = (): JSX.Element => {
         <input
           type="text"
           placeholder="Enter Room ID"
-          value={roomId}
-          onChange={(e) => setRoomId(e.target.value)}
+          value={roomId.current}
+          onChange={(e) => (roomId.current = e.target.value)}
           disabled={isInRoom}
         />
         <button onClick={handleEnterRoom} disabled={!isVideoOn || isInRoom}>
@@ -327,7 +342,7 @@ const Guest = (): JSX.Element => {
         </button>
         {isInRoom && (
           <>
-            <p>In room: {roomId}</p>
+            <p>In room: {roomId.current}</p>
             <button
               onClick={handleEndCall}
               disabled={isEndingCall || !isInRoom}
