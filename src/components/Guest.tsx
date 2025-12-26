@@ -10,7 +10,14 @@ import {
 } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
-import { FaUser } from "react-icons/fa";
+import {
+  FaMicrophone,
+  FaMicrophoneSlash,
+  FaUser,
+  FaVideo,
+  FaVideoSlash,
+} from "react-icons/fa";
+import { MdCallEnd } from "react-icons/md";
 
 const Guest = (): JSX.Element => {
   const [searchParams] = useSearchParams();
@@ -252,6 +259,48 @@ const Guest = (): JSX.Element => {
         <div className="local-feed-container">
           <video ref={localFeed} autoPlay playsInline muted />
         </div>
+      </div>
+
+      <div className="footer">
+        {isInRoom ? (
+          <>Enter</>
+        ) : (
+          <div className="guest-video-controls">
+            <div className="action-buttons">
+              <button
+                className="action-icon-button"
+                onClick={() => {
+                  setIsVideoOn((prev) => !prev);
+                }}
+              >
+                {isVideoOn ? (
+                  <FaVideo className="icon" />
+                ) : (
+                  <FaVideoSlash className="icon" />
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsAudioOn((prev) => !prev);
+                }}
+                className="action-icon-button"
+              >
+                {isAudioOn ? (
+                  <FaMicrophone className="icon" />
+                ) : (
+                  <FaMicrophoneSlash className="icon" />
+                )}
+              </button>
+              <button
+                onClick={handleEndCall}
+                className="action-icon-button end-call-button"
+              >
+                <MdCallEnd className="icon" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
     // <>
