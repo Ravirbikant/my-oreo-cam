@@ -12,8 +12,11 @@ import { serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import "./styles.css";
 import {
+  FaCopy,
   FaMicrophone,
   FaMicrophoneSlash,
+  FaPlus,
+  FaUser,
   FaVideo,
   FaVideoSlash,
 } from "react-icons/fa";
@@ -28,7 +31,6 @@ const Host = (): JSX.Element => {
   const [currentRoomId, setCurrentRoomId] = useState<string>("");
   const processedAnswerRef = useRef<string>("");
   const guestJoinedRef = useRef<boolean>(false);
-  const [isGuestVideoOn, setIsGuestVideoOn] = useState<boolean>(true);
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
   const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -233,26 +235,20 @@ const Host = (): JSX.Element => {
     <>
       <div>
         <div className="remote-feed-container">
-          <video
-            ref={remoteFeed}
-            autoPlay
-            playsInline
-            style={{ opacity: isGuestVideoOn ? 1 : 0 }}
-          />
-
-          <button
-            onClick={() => {
-              setIsGuestVideoOn((prev) => !prev);
-            }}
-          >
-            Turn Guest video {isGuestVideoOn ? "off" : "on"}
-          </button>
+          <video ref={remoteFeed} autoPlay playsInline />
         </div>
 
         <div className="header">
-          <h1>Host ka Screen</h1>
-          <button onClick={() => navigate("/guest")}>
-            Enter as guest instead
+          <div>
+            <h1>Host ka Screen</h1>
+            {currentRoomId && <p>Room ID: {currentRoomId}</p>}
+          </div>
+          <button
+            onClick={() => navigate("/guest")}
+            className="action-icon-button"
+          >
+            <FaUser className="icon" />
+            <p>Enter as guest</p>
           </button>
         </div>
 
@@ -261,53 +257,66 @@ const Host = (): JSX.Element => {
         </div>
       </div>
 
-      <div className="action-buttons">
-        <button
-          className="action-icon-button"
-          onClick={() => {
-            setIsVideoOn((prev) => !prev);
-          }}
-        >
-          {isVideoOn ? (
-            <FaVideo className="icon" />
-          ) : (
-            <FaVideoSlash className="icon" />
-          )}
-        </button>
-
-        <button
-          onClick={() => {
-            setIsAudioOn((prev) => !prev);
-          }}
-          className="action-icon-button"
-        >
-          {isAudioOn ? (
-            <FaMicrophone className="icon" />
-          ) : (
-            <FaMicrophoneSlash className="icon" />
-          )}
-        </button>
-        <button onClick={handleEndCall} className="action-icon-button">
-          <MdCallEnd className="icon" />
-        </button>
-      </div>
-
-      {!currentRoomId ? (
-        <button onClick={handleCreateRoom}>Create Room</button>
-      ) : (
-        <div>
-          <p>Room Id : {currentRoomId}</p>
-          <button
-            onClick={() => {
-              const link = `${window.location.origin}/guest?roomId=${currentRoomId}`;
-              navigator.clipboard.writeText(link);
-              alert("Room link copied to clipboard!");
-            }}
-          >
-            Copy Room Link
+      <div className="footer">
+        {!currentRoomId ? (
+          <button onClick={handleCreateRoom} className="action-icon-button">
+            <FaPlus className="icon" />
+            <p>Create Room</p>
           </button>
-        </div>
-      )}
+        ) : (
+          <div className="call-controls">
+            <div className="room-id-container">
+              <button
+                className="action-icon-button"
+                onClick={() => {
+                  const link = `${window.location.origin}/guest?roomId=${currentRoomId}`;
+                  navigator.clipboard.writeText(link);
+                  alert("Room link copied to clipboard!");
+                }}
+              >
+                <FaCopy className="icon" />
+                <p>Copy Room Link</p>
+              </button>
+            </div>
+
+            <div className="action-buttons">
+              <button
+                className="action-icon-button"
+                onClick={() => {
+                  setIsVideoOn((prev) => !prev);
+                }}
+              >
+                {isVideoOn ? (
+                  <FaVideo className="icon" />
+                ) : (
+                  <FaVideoSlash className="icon" />
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsAudioOn((prev) => !prev);
+                }}
+                className="action-icon-button"
+              >
+                {isAudioOn ? (
+                  <FaMicrophone className="icon" />
+                ) : (
+                  <FaMicrophoneSlash className="icon" />
+                )}
+              </button>
+              <button
+                onClick={handleEndCall}
+                className="action-icon-button end-call-button"
+              >
+                <MdCallEnd className="icon" />
+              </button>
+            </div>
+
+            <div></div>
+          </div>
+        )}
+      </div>
     </>
   );
 };
