@@ -15,7 +15,7 @@ button {
   width: 100vw;
   height: 100vh;
   position: relative;
-  background-color: rgb(150, 212, 112);
+  background-color: rgb(112, 142, 212);
 }
 
 .remote-feed-container video {
@@ -75,14 +75,17 @@ button {
 
 .call-controls {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   width: 100%;
+  position: relative;
 }
 
 .action-buttons {
   display: flex;
   gap: 10px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .action-icon-button p {
@@ -107,4 +110,34 @@ button {
 .icon {
   width: 40px;
   height: 20px;
+}
+
+.host-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.online-icon {
+  width: 10px;
+  height: 10px;
+  background-color: rgb(0, 252, 0);
+  border-radius: 50%;
+}
+
+@media screen and (max-width: 768px) {
+  .action-icon-button {
+    padding: 5px 7px;
+    max-width: 140px;
+  }
+
+  .action-icon-button p {
+    font-size: 12px;
+    padding-right: 0px;
+  }
+
+  .icon {
+    width: 18px;
+    height: 18px;
+  }
 }

@@ -240,8 +240,14 @@ const Host = (): JSX.Element => {
 
         <div className="header">
           <div>
-            <h1>Host ka Screen</h1>
-            {currentRoomId && <p>Room ID: {currentRoomId}</p>}
+            {currentRoomId && (
+              <div className="room-id-container">
+                <div className="host-info">
+                  <div className="online-icon"></div>Host
+                </div>
+                <p>{currentRoomId}</p>
+              </div>
+            )}
           </div>
           <button
             onClick={() => navigate("/guest")}
@@ -312,8 +318,6 @@ const Host = (): JSX.Element => {
                 <MdCallEnd className="icon" />
               </button>
             </div>
-
-            <div></div>
           </div>
         )}
       </div>
