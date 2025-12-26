@@ -37,6 +37,7 @@ const Host = (): JSX.Element => {
   const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleCreateOffer = async (roomId: string) => {
@@ -50,6 +51,7 @@ const Host = (): JSX.Element => {
     pc.ontrack = (e) => {
       if (remoteFeed.current) {
         remoteFeed.current.srcObject = e.streams[0];
+        setIsConnecting(false);
       }
     };
 
@@ -63,6 +65,13 @@ const Host = (): JSX.Element => {
         } catch (err) {
           console.log("Error adding ice candidiate to firebase : ", err);
         }
+      }
+    };
+
+    pc.oniceconnectionstatechange = () => {
+      if (pc.iceConnectionState === "failed") {
+        setIsConnecting(false);
+        alert("Connection failed. Please try again.");
       }
     };
 
@@ -149,6 +158,7 @@ const Host = (): JSX.Element => {
 
       if (data?.answerSdp && data.answerSdp !== processedAnswerRef.current) {
         processedAnswerRef.current = data.answerSdp;
+        setIsConnecting(true);
 
         if (peerConnection.current) {
           const answer = JSON.parse(data.answerSdp);
@@ -354,6 +364,12 @@ const Host = (): JSX.Element => {
       {isCopied && (
         <div className="copied-message">
           <p>Link copied to clipboard!</p>
+        </div>
+      )}
+
+      {isConnecting && (
+        <div className="loading-overlay">
+          <p>Connecting...</p>
         </div>
       )}
     </>

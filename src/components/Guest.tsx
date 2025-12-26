@@ -37,6 +37,7 @@ const Guest = (): JSX.Element => {
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
   const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
+  const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleCreateAnswer = async (roomIdparam: string, offerSdp: string) => {
@@ -50,6 +51,7 @@ const Guest = (): JSX.Element => {
     pc.ontrack = (e) => {
       if (remoteFeed.current) {
         remoteFeed.current.srcObject = e.streams[0];
+        setIsConnecting(false);
       }
     };
 
@@ -67,6 +69,14 @@ const Guest = (): JSX.Element => {
         }
       }
     };
+
+    pc.oniceconnectionstatechange = () => {
+      if (pc.iceConnectionState === "failed") {
+        setIsConnecting(false);
+        alert("Connection failed. Please try again.");
+      }
+    };
+
     const offer = JSON.parse(offerSdp);
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
 
@@ -179,6 +189,7 @@ const Guest = (): JSX.Element => {
     });
 
     setIsInRoom(true);
+    setIsConnecting(true); // Start loading when entering room
     console.log("Entered room : ", roomId.current.trim());
   };
 
@@ -344,6 +355,12 @@ const Guest = (): JSX.Element => {
           </div>
         )}
       </div>
+
+      {isConnecting && (
+        <div className="loading-overlay">
+          <p>Connecting...</p>
+        </div>
+      )}
     </>
   );
 };
