@@ -18,6 +18,8 @@ import {
   FaVideoSlash,
 } from "react-icons/fa";
 import { MdCallEnd } from "react-icons/md";
+import { FaMaximize, FaMinimize } from "react-icons/fa6";
+import screenfull from "screenfull";
 
 const Guest = (): JSX.Element => {
   const [searchParams] = useSearchParams();
@@ -32,9 +34,9 @@ const Guest = (): JSX.Element => {
     searchParams.get("roomId") || ""
   );
   const [isInRoom, setIsInRoom] = useState<boolean>(false);
-  const [isHostVideoOn, setIsHostVideoOn] = useState<boolean>(true);
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
   const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleCreateAnswer = async (roomIdparam: string, offerSdp: string) => {
@@ -205,6 +207,12 @@ const Guest = (): JSX.Element => {
     setIsEndingCall(false);
   };
 
+  const toggleFullscreen = () => {
+    if (screenfull.isEnabled) {
+      screenfull.toggle();
+    }
+  };
+
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {
       try {
@@ -235,6 +243,13 @@ const Guest = (): JSX.Element => {
 
     getLocalFeed();
   }, [isVideoOn, isAudioOn]);
+
+  useEffect(() => {
+    if (!screenfull.isEnabled) return;
+    const handleChange = () => setIsFullScreen(screenfull.isFullscreen);
+    screenfull.on("change", handleChange);
+    return () => screenfull.off("change", handleChange);
+  }, []);
 
   return (
     <>
@@ -267,7 +282,7 @@ const Guest = (): JSX.Element => {
       </div>
 
       <div className="footer">
-        {!isInRoom ? (
+        {isInRoom ? (
           <div className="guest-enter-room">
             <input
               type="text"
@@ -310,6 +325,13 @@ const Guest = (): JSX.Element => {
                   <FaMicrophone className="icon" />
                 ) : (
                   <FaMicrophoneSlash className="icon" />
+                )}
+              </button>
+              <button onClick={toggleFullscreen} className="action-icon-button">
+                {!isFullScreen ? (
+                  <FaMaximize className="icon" />
+                ) : (
+                  <FaMinimize className="icon" />
                 )}
               </button>
               <button

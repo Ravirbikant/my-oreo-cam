@@ -21,6 +21,8 @@ import {
   FaVideoSlash,
 } from "react-icons/fa";
 import { MdCallEnd } from "react-icons/md";
+import { FaMaximize, FaMinimize } from "react-icons/fa6";
+import screenfull from "screenfull";
 
 const Host = (): JSX.Element => {
   const localFeed = useRef<HTMLVideoElement>(null);
@@ -33,6 +35,7 @@ const Host = (): JSX.Element => {
   const guestJoinedRef = useRef<boolean>(false);
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
   const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleCreateOffer = async (roomId: string) => {
@@ -197,6 +200,12 @@ const Host = (): JSX.Element => {
     setIsEndingCall(false);
   };
 
+  const toggleFullscreen = () => {
+    if (screenfull.isEnabled) {
+      screenfull.toggle();
+    }
+  };
+
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {
       try {
@@ -230,6 +239,13 @@ const Host = (): JSX.Element => {
 
     //May also add firebase listeners cleanup here
   }, [isVideoOn, isAudioOn]);
+
+  useEffect(() => {
+    if (!screenfull.isEnabled) return;
+    const handleChange = () => setIsFullScreen(screenfull.isFullscreen);
+    screenfull.on("change", handleChange);
+    return () => screenfull.off("change", handleChange);
+  }, []);
 
   return (
     <>
@@ -298,6 +314,13 @@ const Host = (): JSX.Element => {
                   <FaMicrophone className="icon" />
                 ) : (
                   <FaMicrophoneSlash className="icon" />
+                )}
+              </button>
+              <button onClick={toggleFullscreen} className="action-icon-button">
+                {!isFullScreen ? (
+                  <FaMaximize className="icon" />
+                ) : (
+                  <FaMinimize className="icon" />
                 )}
               </button>
               <button
