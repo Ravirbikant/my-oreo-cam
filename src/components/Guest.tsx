@@ -10,6 +10,7 @@ import {
 } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
+import { FaUser } from "react-icons/fa";
 
 const Guest = (): JSX.Element => {
   const [searchParams] = useSearchParams();
@@ -225,76 +226,93 @@ const Guest = (): JSX.Element => {
 
   return (
     <>
-      <h1>Guest Screen</h1>
       <div>
-        <div>
-          <div>
-            <div>
-              {!isHostVideoOn && <div>Host</div>}
-              <video
-                ref={remoteFeed}
-                autoPlay
-                playsInline
-                style={{ opacity: isHostVideoOn ? 1 : 0 }}
-              />
-            </div>
-            <p>Remote feed</p>
-            <button
-              onClick={() => {
-                setIsHostVideoOn((prev) => !prev);
-              }}
-            >
-              Turn Host Video {isHostVideoOn ? "off" : "on"}
-            </button>
-          </div>
+        <div className="remote-feed-container">
+          <video ref={remoteFeed} autoPlay playsInline />
+        </div>
 
+        <div className="header">
           <div>
-            <div>
-              <video ref={localFeed} autoPlay playsInline muted />
-              <p>Local feed</p>
+            <div className="room-id-container">
+              <div className="header-info">
+                <div className="online-icon"></div>Guest
+              </div>
+              {roomId.current && <p>{roomId.current}</p>}
             </div>
-            <button
-              onClick={() => {
-                setIsVideoOn((prev) => !prev);
-              }}
-            >
-              Turn Video {isVideoOn ? "off" : "on"}
-            </button>
-            <button
-              onClick={() => {
-                setIsAudioOn((prev) => !prev);
-              }}
-            >
-              Turn Audio {isAudioOn ? "off" : "on"}
-            </button>
           </div>
+          <button
+            onClick={() => navigate("/host")}
+            className="action-icon-button"
+          >
+            <FaUser className="icon" />
+            <p>Enter as host</p>
+          </button>
+        </div>
+
+        <div className="local-feed-container">
+          <video ref={localFeed} autoPlay playsInline muted />
         </div>
       </div>
-
-      <div>
-        <input
-          type="text"
-          placeholder="Enter Room ID"
-          value={roomId.current}
-          onChange={(e) => (roomId.current = e.target.value)}
-          disabled={isInRoom}
-        />
-        <button onClick={handleEnterRoom} disabled={!isVideoOn || isInRoom}>
-          Enter Room
-        </button>
-        {isInRoom && (
-          <>
-            <p>In room: {roomId.current}</p>
-            <button
-              onClick={handleEndCall}
-              disabled={isEndingCall || !isInRoom}
-            >
-              {isEndingCall ? "Ending call..." : "End Call"}
-            </button>
-          </>
-        )}
-      </div>
     </>
+    // <>
+    //   <div>
+    //     <div>
+    //       <p>Remote feed</p>
+    //       <button
+    //         onClick={() => {
+    //           setIsHostVideoOn((prev) => !prev);
+    //         }}
+    //       >
+    //         Turn Host Video {isHostVideoOn ? "off" : "on"}
+    //       </button>
+    //     </div>
+
+    //     <div>
+    //       <div>
+    //         <video ref={localFeed} autoPlay playsInline muted />
+    //         <p>Local feed</p>
+    //       </div>
+    //       <button
+    //         onClick={() => {
+    //           setIsVideoOn((prev) => !prev);
+    //         }}
+    //       >
+    //         Turn Video {isVideoOn ? "off" : "on"}
+    //       </button>
+    //       <button
+    //         onClick={() => {
+    //           setIsAudioOn((prev) => !prev);
+    //         }}
+    //       >
+    //         Turn Audio {isAudioOn ? "off" : "on"}
+    //       </button>
+    //     </div>
+    //   </div>
+
+    //   <div>
+    //     <input
+    //       type="text"
+    //       placeholder="Enter Room ID"
+    //       value={roomId.current}
+    //       onChange={(e) => (roomId.current = e.target.value)}
+    //       disabled={isInRoom}
+    //     />
+    //     <button onClick={handleEnterRoom} disabled={!isVideoOn || isInRoom}>
+    //       Enter Room
+    //     </button>
+    //     {isInRoom && (
+    //       <>
+    //         <p>In room: {roomId.current}</p>
+    //         <button
+    //           onClick={handleEndCall}
+    //           disabled={isEndingCall || !isInRoom}
+    //         >
+    //           {isEndingCall ? "Ending call..." : "End Call"}
+    //         </button>
+    //       </>
+    //     )}
+    //   </div>
+    // </>
   );
 };
 

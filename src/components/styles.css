@@ -112,7 +112,7 @@ button {
   height: 20px;
 }
 
-.host-info {
+.header-info {
   display: flex;
   align-items: center;
   gap: 10px;
