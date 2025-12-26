@@ -28,6 +28,9 @@ const Guest = (): JSX.Element => {
   const [isVideoOn, setIsVideoOn] = useState<boolean>(true);
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const roomId = useRef<string>(searchParams.get("roomId") || "");
+  const [roomIdInput, setRoomIdInput] = useState<string>(
+    searchParams.get("roomId") || ""
+  );
   const [isInRoom, setIsInRoom] = useState<boolean>(false);
   const [isHostVideoOn, setIsHostVideoOn] = useState<boolean>(true);
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
@@ -95,10 +98,12 @@ const Guest = (): JSX.Element => {
       return;
     }
 
-    if (!roomId.current.trim()) {
+    if (!roomIdInput.trim()) {
       alert("Please enter the room ID");
       return;
     }
+
+    roomId.current = roomIdInput.trim();
 
     const hostDataRef = doc(
       db,
@@ -262,8 +267,23 @@ const Guest = (): JSX.Element => {
       </div>
 
       <div className="footer">
-        {isInRoom ? (
-          <>Enter</>
+        {!isInRoom ? (
+          <div className="guest-enter-room">
+            <input
+              type="text"
+              placeholder="Enter Room ID"
+              value={roomIdInput}
+              onChange={(e) => setRoomIdInput(e.target.value)}
+              className="room-id-input"
+            />
+            <button
+              onClick={handleEnterRoom}
+              className="action-icon-button"
+              disabled={!isVideoOn}
+            >
+              <p>Enter Room</p>
+            </button>
+          </div>
         ) : (
           <div className="guest-video-controls">
             <div className="action-buttons">
