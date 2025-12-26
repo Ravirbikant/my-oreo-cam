@@ -36,6 +36,7 @@ const Host = (): JSX.Element => {
   const [isAudioOn, setIsAudioOn] = useState<boolean>(true);
   const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleCreateOffer = async (roomId: string) => {
@@ -94,7 +95,7 @@ const Host = (): JSX.Element => {
       return;
     }
 
-    const newRoomId = `room-${Date.now()}`;
+    const newRoomId = Date.now().toString();
     setCurrentRoomId(newRoomId);
     navigate(`/host?roomId=${newRoomId}`, { replace: true });
 
@@ -105,7 +106,6 @@ const Host = (): JSX.Element => {
         roomId: newRoomId,
         createdAt: serverTimestamp(),
       });
-      console.log("Room created");
       await handleCreateOffer(newRoomId);
       setUpFirebaseListeners(newRoomId);
     } catch (error) {
@@ -210,6 +210,10 @@ const Host = (): JSX.Element => {
     const guestLink = `${window.location.origin}/guest?roomId=${currentRoomId}`;
     try {
       await navigator.clipboard.writeText(guestLink);
+      setIsCopied(true);
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
     } catch (err) {
       console.log("Error copying link : ", err);
     }
@@ -346,6 +350,12 @@ const Host = (): JSX.Element => {
           </div>
         )}
       </div>
+
+      {isCopied && (
+        <div className="copied-message">
+          <p>Link copied to clipboard!</p>
+        </div>
+      )}
     </>
   );
 };
