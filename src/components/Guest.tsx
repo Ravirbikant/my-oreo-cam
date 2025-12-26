@@ -285,7 +285,7 @@ const Guest = (): JSX.Element => {
             </button>
           </div>
         ) : (
-          <div className="guest-video-controls">
+          <div className="video-controls">
             <div className="action-buttons">
               <button
                 className="action-icon-button"
@@ -323,65 +323,6 @@ const Guest = (): JSX.Element => {
         )}
       </div>
     </>
-    // <>
-    //   <div>
-    //     <div>
-    //       <p>Remote feed</p>
-    //       <button
-    //         onClick={() => {
-    //           setIsHostVideoOn((prev) => !prev);
-    //         }}
-    //       >
-    //         Turn Host Video {isHostVideoOn ? "off" : "on"}
-    //       </button>
-    //     </div>
-
-    //     <div>
-    //       <div>
-    //         <video ref={localFeed} autoPlay playsInline muted />
-    //         <p>Local feed</p>
-    //       </div>
-    //       <button
-    //         onClick={() => {
-    //           setIsVideoOn((prev) => !prev);
-    //         }}
-    //       >
-    //         Turn Video {isVideoOn ? "off" : "on"}
-    //       </button>
-    //       <button
-    //         onClick={() => {
-    //           setIsAudioOn((prev) => !prev);
-    //         }}
-    //       >
-    //         Turn Audio {isAudioOn ? "off" : "on"}
-    //       </button>
-    //     </div>
-    //   </div>
-
-    //   <div>
-    //     <input
-    //       type="text"
-    //       placeholder="Enter Room ID"
-    //       value={roomId.current}
-    //       onChange={(e) => (roomId.current = e.target.value)}
-    //       disabled={isInRoom}
-    //     />
-    //     <button onClick={handleEnterRoom} disabled={!isVideoOn || isInRoom}>
-    //       Enter Room
-    //     </button>
-    //     {isInRoom && (
-    //       <>
-    //         <p>In room: {roomId.current}</p>
-    //         <button
-    //           onClick={handleEndCall}
-    //           disabled={isEndingCall || !isInRoom}
-    //         >
-    //           {isEndingCall ? "Ending call..." : "End Call"}
-    //         </button>
-    //       </>
-    //     )}
-    //   </div>
-    // </>
   );
 };
 

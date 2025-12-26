@@ -244,7 +244,12 @@ const Host = (): JSX.Element => {
               <div className="header-info">
                 <div className="online-icon"></div>Host
               </div>
-              {currentRoomId && <p>{currentRoomId}</p>}
+              {currentRoomId && (
+                <div className="header-info" style={{ marginTop: "10px" }}>
+                  <FaCopy className="icon" style={{ cursor: "pointer" }} />
+                  <p>{currentRoomId}</p>
+                </div>
+              )}
             </div>
           </div>
           <button
@@ -268,21 +273,7 @@ const Host = (): JSX.Element => {
             <p>Create Room</p>
           </button>
         ) : (
-          <div className="call-controls">
-            <div className="room-id-container">
-              <button
-                className="action-icon-button"
-                onClick={() => {
-                  const link = `${window.location.origin}/guest?roomId=${currentRoomId}`;
-                  navigator.clipboard.writeText(link);
-                  alert("Room link copied to clipboard!");
-                }}
-              >
-                <FaCopy className="icon" />
-                <p>Copy Room Link</p>
-              </button>
-            </div>
-
+          <div className="video-controls">
             <div className="action-buttons">
               <button
                 className="action-icon-button"
