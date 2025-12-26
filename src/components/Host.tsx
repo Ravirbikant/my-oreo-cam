@@ -206,6 +206,15 @@ const Host = (): JSX.Element => {
     }
   };
 
+  const handleCopyLink = async () => {
+    const guestLink = `${window.location.origin}/guest?roomId=${currentRoomId}`;
+    try {
+      await navigator.clipboard.writeText(guestLink);
+    } catch (err) {
+      console.log("Error copying link : ", err);
+    }
+  };
+
   useEffect(() => {
     const getLocalFeed = async (): Promise<void> => {
       try {
@@ -262,7 +271,11 @@ const Host = (): JSX.Element => {
               </div>
               {currentRoomId && (
                 <div className="header-info" style={{ marginTop: "10px" }}>
-                  <FaCopy className="icon" style={{ cursor: "pointer" }} />
+                  <FaCopy
+                    className="icon"
+                    style={{ cursor: "pointer" }}
+                    onClick={handleCopyLink}
+                  />
                   <p>{currentRoomId}</p>
                 </div>
               )}
