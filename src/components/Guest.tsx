@@ -282,7 +282,7 @@ const Guest = (): JSX.Element => {
       </div>
 
       <div className="footer">
-        {isInRoom ? (
+        {!isInRoom ? (
           <div className="guest-enter-room">
             <input
               type="text"
