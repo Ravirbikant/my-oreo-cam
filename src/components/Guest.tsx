@@ -39,6 +39,7 @@ const Guest = (): JSX.Element => {
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isGuestDataWritten, setIsGuestDataWritten] = useState<boolean>(false);
+  const [hostJoined, setHostJoined] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleCreateAnswer = async (roomIdparam: string, offerSdp: string) => {
@@ -53,6 +54,7 @@ const Guest = (): JSX.Element => {
       if (remoteFeed.current) {
         remoteFeed.current.srcObject = e.streams[0];
         setIsConnecting(false);
+        setHostJoined(true);
       }
     };
 
@@ -149,6 +151,7 @@ const Guest = (): JSX.Element => {
         try {
           await deleteDoc(guestDataRef);
           navigate("/call-ended");
+          setHostJoined(false);
         } catch (err) {
           console.log("Error clearning up guest data : ", err);
         }
@@ -294,7 +297,11 @@ const Guest = (): JSX.Element => {
           )}
         </div>
 
-        <div className="local-feed-container">
+        <div
+          className={`local-feed-container ${
+            !hostJoined ? "local-feed-fullscreen" : ""
+          }`}
+        >
           <video ref={localFeed} autoPlay playsInline muted />
         </div>
       </div>
