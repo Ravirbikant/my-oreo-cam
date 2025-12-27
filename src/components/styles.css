@@ -30,6 +30,7 @@ button {
   justify-content: center;
   align-items: center;
   gap: 20px;
+  text-align: center;
 }
 
 .header {
@@ -48,6 +49,7 @@ button {
   right: 20px;
   width: 180px;
   height: 200px;
+  transition: all 0.5s ease-in-out;
 }
 
 .local-feed-container video {
@@ -56,6 +58,21 @@ button {
   object-fit: cover;
   border-radius: 20px;
   transform: scaleX(-1);
+}
+
+.local-feed-container.local-feed-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+}
+
+.local-feed-container.local-feed-fullscreen video {
+  border-radius: 0;
 }
 
 .footer {

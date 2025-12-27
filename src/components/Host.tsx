@@ -38,6 +38,7 @@ const Host = (): JSX.Element => {
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
+  const [guestJoined, setGuestJoined] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleCreateOffer = async (roomId: string) => {
@@ -52,6 +53,7 @@ const Host = (): JSX.Element => {
       if (remoteFeed.current) {
         remoteFeed.current.srcObject = e.streams[0];
         setIsConnecting(false);
+        setGuestJoined(true);
       }
     };
 
@@ -142,6 +144,7 @@ const Host = (): JSX.Element => {
           try {
             await deleteDoc(doc(db, "rooms", roomId, "hostData", "data"));
             navigate("/call-ended");
+            setGuestJoined(false);
           } catch (err) {
             console.log("Error cleaning up host data : ", err);
           }
@@ -305,7 +308,11 @@ const Host = (): JSX.Element => {
           )}
         </div>
 
-        <div className="local-feed-container">
+        <div
+          className={`local-feed-container ${
+            !guestJoined ? "local-feed-fullscreen" : ""
+          }`}
+        >
           <video ref={localFeed} autoPlay playsInline muted />
         </div>
       </div>
