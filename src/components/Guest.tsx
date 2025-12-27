@@ -38,6 +38,7 @@ const Guest = (): JSX.Element => {
   const [isEndingCall, setIsEndingCall] = useState<boolean>(false);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
+  const [isGuestDataWritten, setIsGuestDataWritten] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleCreateAnswer = async (roomIdparam: string, offerSdp: string) => {
@@ -94,6 +95,7 @@ const Guest = (): JSX.Element => {
         { merge: true }
       );
       console.log("Answer SDP written to Firebase");
+      setIsGuestDataWritten(true);
     } catch (error) {
       console.log("Error writing answer SDP to Firebase : ", error);
     }
@@ -152,6 +154,7 @@ const Guest = (): JSX.Element => {
         }
         setIsEndingCall(false);
         setIsInRoom(false);
+        setIsGuestDataWritten(false);
         roomId.current = "";
         return;
       }
@@ -189,7 +192,7 @@ const Guest = (): JSX.Element => {
     });
 
     setIsInRoom(true);
-    setIsConnecting(true); // Start loading when entering room
+    setIsConnecting(true);
     console.log("Entered room : ", roomId.current.trim());
   };
 
@@ -211,6 +214,7 @@ const Guest = (): JSX.Element => {
     try {
       await deleteDoc(doc(db, "rooms", roomId.current, "guestData", "data"));
       roomId.current = "";
+      setIsGuestDataWritten(false);
       navigate("/call-ended");
     } catch (err) {
       console.log("Error ending the call : ", err);
@@ -275,16 +279,19 @@ const Guest = (): JSX.Element => {
               <div className="header-info">
                 <div className="online-icon"></div>Guest
               </div>
-              {roomId.current && <p>{roomId.current}</p>}
             </div>
           </div>
-          <button
-            onClick={() => navigate("/host")}
-            className="action-icon-button"
-          >
-            <FaUser className="icon" />
-            <p>Enter as host</p>
-          </button>
+          {isGuestDataWritten ? (
+            <p>{roomId.current}</p>
+          ) : (
+            <button
+              onClick={() => navigate("/host")}
+              className="action-icon-button"
+            >
+              <FaUser className="icon" />
+              <p>Enter as host</p>
+            </button>
+          )}
         </div>
 
         <div className="local-feed-container">

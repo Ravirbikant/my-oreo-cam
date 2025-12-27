@@ -283,25 +283,26 @@ const Host = (): JSX.Element => {
               <div className="header-info">
                 <div className="online-icon"></div>Host
               </div>
-              {currentRoomId && (
-                <div className="header-info" style={{ marginTop: "10px" }}>
-                  <FaCopy
-                    className="icon"
-                    style={{ cursor: "pointer" }}
-                    onClick={handleCopyLink}
-                  />
-                  <p>{currentRoomId}</p>
-                </div>
-              )}
             </div>
           </div>
-          <button
-            onClick={() => navigate("/guest")}
-            className="action-icon-button"
-          >
-            <FaUser className="icon" />
-            <p>Enter as guest</p>
-          </button>
+          {currentRoomId ? (
+            <div className="header-info" style={{ marginTop: "10px" }}>
+              <FaCopy
+                className="icon"
+                style={{ cursor: "pointer" }}
+                onClick={handleCopyLink}
+              />
+              <p>{currentRoomId}</p>
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate("/guest")}
+              className="action-icon-button"
+            >
+              <FaUser className="icon" />
+              <p>Enter as guest</p>
+            </button>
+          )}
         </div>
 
         <div className="local-feed-container">
