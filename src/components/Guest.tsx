@@ -331,10 +331,10 @@ const Guest = (): JSX.Element => {
             />
             <button
               onClick={handleEnterRoom}
-              className="action-icon-button primary-btn"
+              className="action-icon-button primary-btn enter-room-button"
               disabled={!isVideoOn}
             >
-              <p>Enter Room</p>
+              Enter Room
             </button>
           </div>
         ) : (
