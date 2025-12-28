@@ -269,6 +269,19 @@ const Guest = (): JSX.Element => {
     return () => screenfull.off("change", handleChange);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (localStream.current) {
+        localStream.current.getTracks().forEach((track) => track.stop());
+        localStream.current = null;
+      }
+      if (peerConnection.current) {
+        peerConnection.current.close();
+        peerConnection.current = null;
+      }
+    };
+  }, []);
+
   return (
     <>
       <div>
