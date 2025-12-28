@@ -134,6 +134,14 @@ button {
   max-height: 40px;
 }
 
+.primary-btn {
+  background-color: rgb(151, 107, 255);
+}
+
+.primary-btn:hover {
+  background-color: rgb(56, 0, 204);
+}
+
 .call-controls {
   display: flex;
   align-items: center;

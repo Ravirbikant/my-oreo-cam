@@ -1,73 +1,48 @@
-# React + TypeScript + Vite
+# My Oreo Cam
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple peer-to-peer video calling application built with WebRTC technology. Connect with anyone in real-time through your browser.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React** - UI framework
+- **TypeScript** - Type-safe development
+- **Vite** - Fast build tool
+- **Firebase Firestore** - Signaling server for WebRTC
+- **WebRTC** - Peer-to-peer video/audio communication
+- **React Router** - Navigation
+- **React Icons** - UI icons
+- **Screenfull** - Fullscreen API
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Installation
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Usage
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+#### As Host
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. Click **"Create Room"** to start a new video call
+2. Share the **Room ID** or copy the guest link
+3. Wait for the guest to join
+4. Use controls to toggle video/audio, fullscreen, or end the call
+
+#### As Guest
+
+1. Navigate to the guest page or use the shared link
+2. Enter the **Room ID** provided by the host
+3. Click **"Enter Room"** to join the call
+4. Use controls to toggle video/audio, fullscreen, or end the call
+
+## Features
+
+- Real-time peer-to-peer video calling
+- Audio/video toggle controls
+- Fullscreen mode
+- Easy room sharing with copy-to-clipboard
+- Automatic reconnection handling
+- Mobile-friendly responsive design

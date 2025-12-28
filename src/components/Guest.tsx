@@ -289,7 +289,7 @@ const Guest = (): JSX.Element => {
           ) : (
             <button
               onClick={() => navigate("/host")}
-              className="action-icon-button"
+              className="action-icon-button primary-btn"
             >
               <FaUser className="icon" />
               <p>Enter as host</p>
@@ -318,7 +318,7 @@ const Guest = (): JSX.Element => {
             />
             <button
               onClick={handleEnterRoom}
-              className="action-icon-button"
+              className="action-icon-button primary-btn"
               disabled={!isVideoOn}
             >
               <p>Enter Room</p>

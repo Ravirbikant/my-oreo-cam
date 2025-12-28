@@ -165,7 +165,7 @@ const Host = (): JSX.Element => {
 
         if (peerConnection.current) {
           const answer = JSON.parse(data.answerSdp);
-          peerConnection.current.setRemoteDescription(
+          await peerConnection.current.setRemoteDescription(
             new RTCSessionDescription(answer)
           );
         }
@@ -300,7 +300,7 @@ const Host = (): JSX.Element => {
           ) : (
             <button
               onClick={() => navigate("/guest")}
-              className="action-icon-button"
+              className="action-icon-button primary-btn"
             >
               <FaUser className="icon" />
               <p>Enter as guest</p>
@@ -319,7 +319,10 @@ const Host = (): JSX.Element => {
 
       <div className="footer">
         {!currentRoomId ? (
-          <button onClick={handleCreateRoom} className="action-icon-button">
+          <button
+            onClick={handleCreateRoom}
+            className="action-icon-button primary-btn"
+          >
             <FaPlus className="icon" />
             <p>Create Room</p>
           </button>
